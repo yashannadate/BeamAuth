@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { clsx } from "clsx";
+import { useWallet } from "@/context/WalletContext";
 
 const NAV_LINKS = [
   { label: "Features",  href: "#features"  },
@@ -14,8 +15,7 @@ const NAV_LINKS = [
 export default function Navbar() {
   const [scrolled,    setScrolled]    = useState(false);
   const [menuOpen,    setMenuOpen]    = useState(false);
-  const [connecting,  setConnecting]  = useState(false);
-  const [walletAddr,  setWalletAddr]  = useState<string | null>(null);
+  const { walletAddress: walletAddr, connecting, connectWallet: handleConnectFreighter } = useWallet();
 
   // Shrink nav on scroll
   useEffect(() => {
@@ -23,32 +23,6 @@ export default function Navbar() {
     window.addEventListener("scroll", handler, { passive: true });
     return () => window.removeEventListener("scroll", handler);
   }, []);
-
-  const handleConnectFreighter = async () => {
-    setConnecting(true);
-    try {
-      // Dynamic import so Freighter doesn't break SSR
-      const { getAddress, isConnected, setAllowed } =
-        await import("@stellar/freighter-api");
-
-      const connected = await isConnected();
-      if (!connected) {
-        alert("Please install the Freighter browser extension to connect your Stellar wallet.");
-        return;
-      }
-      await setAllowed();
-      const { address, error } = await getAddress();
-      if (error) {
-        console.error("Freighter address error:", error);
-        return;
-      }
-      setWalletAddr(address);
-    } catch (err) {
-      console.error("Freighter error:", err);
-    } finally {
-      setConnecting(false);
-    }
-  };
 
   const shortAddr = walletAddr
     ? `${walletAddr.slice(0, 4)}…${walletAddr.slice(-4)}`

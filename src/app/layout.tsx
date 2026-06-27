@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { WalletProvider } from "@/context/WalletContext";
 
 export const metadata: Metadata = {
   title: "BeamAuth — Stellar Onboarding Protocol",
@@ -40,7 +41,9 @@ export default function RootLayout({
       <body className="bg-beam-black text-beam-white antialiased">
         {/* Subtle noise texture overlay for depth */}
         <div className="noise-overlay" aria-hidden="true" />
-        {children}
+        <WalletProvider>
+          {children}
+        </WalletProvider>
       </body>
     </html>
   );

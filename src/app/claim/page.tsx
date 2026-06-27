@@ -52,7 +52,7 @@ function ClaimPageInner() {
       }
 
       // Real flow: trigger WebAuthn FaceID (Phase 4 will fully wire this)
-      const { startAuthentication } = await import("@simplewebauthn/browser");
+      const { startRegistration } = await import("@simplewebauthn/browser");
 
       const rpcUrl = process.env.NEXT_PUBLIC_STELLAR_RPC_URL || "https://soroban-testnet.stellar.org";
       const escrowId = process.env.NEXT_PUBLIC_ESCROW_CONTRACT_ID || "";
@@ -74,7 +74,7 @@ function ClaimPageInner() {
       const challengeOptions = await challengeRes.json();
 
       // Trigger OS biometric prompt
-      const authResponse = await startAuthentication(challengeOptions);
+      const authResponse = await startRegistration(challengeOptions);
 
       // Start listening to contract events on the Stellar blockchain in parallel
       const listenForEventOnChain = async () => {

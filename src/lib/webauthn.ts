@@ -198,6 +198,52 @@ export function bytesToBase64Url(bytes: Uint8Array): string {
   return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
 }
 
+/**
+ * Extracts the raw authData byte array from a CBOR-encoded attestationObject.
+ * This scans for the "authData" key marker and parses its length.
+ */
+export function extractAuthDataFromAttestationObject(attObj: Uint8Array): Uint8Array {
+  // CBOR representation of text key "authData":
+  // 0x68 (text string length 8) followed by "authData" ASCII bytes
+  const marker = new Uint8Array([0x68, 0x61, 0x75, 0x74, 0x68, 0x44, 0x61, 0x74, 0x61]);
+  let index = -1;
+  for (let i = 0; i <= attObj.length - marker.length; i++) {
+    let match = true;
+    for (let j = 0; j < marker.length; j++) {
+      if (attObj[i + j] !== marker[j]) {
+        match = false;
+        break;
+      }
+    }
+    if (match) {
+      index = i;
+      break;
+    }
+  }
+
+  if (index === -1) {
+    throw new Error("Invalid attestationObject: 'authData' key not found");
+  }
+
+  // The value starts after the marker
+  let valOffset = index + marker.length;
+  const typeByte = attObj[valOffset];
+
+  if (typeByte === 0x58) { // Byte string with 1-byte length
+    const len = attObj[valOffset + 1];
+    return attObj.slice(valOffset + 2, valOffset + 2 + len);
+  } else if (typeByte === 0x59) { // Byte string with 2-byte length
+    const len = (attObj[valOffset + 1] << 8) | attObj[valOffset + 2];
+    return attObj.slice(valOffset + 3, valOffset + 3 + len);
+  } else {
+    if (typeByte >= 0x40 && typeByte <= 0x57) {
+      const len = typeByte - 0x40;
+      return attObj.slice(valOffset + 1, valOffset + 1 + len);
+    }
+    throw new Error(`Unexpected CBOR type for authData: 0x${typeByte.toString(16)}`);
+  }
+}
+
 /** Converts a Uint8Array to a lowercase hex string. */
 export function bytesToHex(bytes: Uint8Array): string {
   return Array.from(bytes)

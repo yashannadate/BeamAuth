@@ -17,6 +17,7 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   derToRawSignature,
   extractPublicKeyFromAuthData,
+  extractAuthDataFromAttestationObject,
   computeSignatureMessage,
   base64UrlToBytes,
   bytesToHex,
@@ -52,48 +53,54 @@ export async function POST(req: NextRequest) {
       return errorResponse(400, "Missing required fields: secret, webauthnResponse");
     }
 
-    // ── 2. Decode WebAuthn assertion components ─────────────────────────────
+    // ── 2. Decode WebAuthn components ───────────────────────────────────────
     const { response: assertionResponse } = webauthnResponse;
-
-    const authenticatorDataBytes = base64UrlToBytes(assertionResponse.authenticatorData);
-    const clientDataJSON         = atob(
+    const clientDataJSON = atob(
       assertionResponse.clientDataJSON.replace(/-/g, "+").replace(/_/g, "/")
     );
 
-    // ── 3. Extract secp256r1 public key from authenticatorData ──────────────
-    // On first registration the authenticatorData contains the COSE key.
-    // On subsequent assertions we use the stored public key.
-    // For this MVP relayer, the public key is included in the assertion data.
     let publicKeyHex: string;
+    let signatureHex = "";
 
+    // ── 3. Extract public key and handle signature based on ceremony type ──
     if (assertionResponse.attestationObject) {
-      // Registration ceremony — extract fresh public key
+      // ── Registration (first-time claim) ──
       const attObj = base64UrlToBytes(assertionResponse.attestationObject);
-      publicKeyHex = bytesToHex(extractPublicKeyFromAuthData(attObj));
-    } else if (body.publicKeyHex) {
-      // Subsequent assertion — client sends the stored public key
-      publicKeyHex = body.publicKeyHex;
+      
+      // Extract the raw authData byte array from the CBOR attestationObject
+      const authData = extractAuthDataFromAttestationObject(attObj);
+      
+      // Extract public key coordinates from the authData COSE map
+      publicKeyHex = bytesToHex(extractPublicKeyFromAuthData(authData));
+      
+      console.log("[relay] Registration detected. Extracted Public Key:", publicKeyHex.slice(0, 16) + "...");
     } else {
-      return errorResponse(400, "publicKeyHex required for authentication assertions");
+      // ── Assertion (subsequent transacts) ──
+      if (!assertionResponse.authenticatorData || !assertionResponse.signature) {
+        return errorResponse(400, "authenticatorData and signature are required for assertions");
+      }
+      if (!body.publicKeyHex) {
+        return errorResponse(400, "publicKeyHex required for assertions");
+      }
+
+      publicKeyHex = body.publicKeyHex;
+
+      const authenticatorDataBytes = base64UrlToBytes(assertionResponse.authenticatorData);
+      const rawSignature = derToRawSignature(assertionResponse.signature);
+      signatureHex = bytesToHex(rawSignature);
+
+      // Verify the WebAuthn signature message format
+      const messageHash = await computeSignatureMessage(
+        authenticatorDataBytes,
+        clientDataJSON,
+      );
+      console.log("[relay] Assertion detected. Message hash:", bytesToHex(messageHash));
     }
 
-    // ── 4. Convert DER signature → raw 64-byte r||s ─────────────────────────
-    const rawSignature   = derToRawSignature(assertionResponse.signature);
-    const signatureHex   = bytesToHex(rawSignature);
-
-    // ── 5. Verify the WebAuthn signature message format ──────────────────────
-    // (Soroban verifies the actual signature on-chain; we just format it here)
-    const messageHash = await computeSignatureMessage(
-      authenticatorDataBytes,
-      clientDataJSON,
-    );
-    console.log("[relay] Message hash:", bytesToHex(messageHash));
     console.log("[relay] Public key:  ", publicKeyHex.slice(0, 16) + "...");
-    console.log("[relay] Signature:   ", signatureHex.slice(0, 16) + "...");
+    console.log("[relay] Signature:   ", signatureHex ? signatureHex.slice(0, 16) + "..." : "none");
 
-    // ── 6. Convert secret string → hex ──────────────────────────────────────
-    // The secret arrives as a plain string from the URL parameter.
-    // We encode it to bytes then hex for the Soroban contract.
+    // ── 4. Convert secret string → hex ──────────────────────────────────────
     const secretHex = bytesToHex(new TextEncoder().encode(secret));
 
     // ── 7. Build and submit the Fee-Bump transaction ─────────────────────────

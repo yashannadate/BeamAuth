@@ -1,0 +1,17 @@
+[package]
+name    = "escrow"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[lib]
+# cdylib  → compiled to WASM for on-chain deployment
+# rlib    → used by the test harness (cargo test)
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+soroban-sdk = { workspace = true }
+
+[dev-dependencies]
+# testutils feature enables Env::default(), register_contract, etc.
+soroban-sdk = { workspace = true, features = ["testutils"] }

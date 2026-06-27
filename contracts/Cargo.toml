@@ -1,0 +1,26 @@
+[workspace]
+members = [
+    "escrow",
+    "passkey_wallet",
+    "factory",
+]
+resolver = "2"
+
+[workspace.dependencies]
+soroban-sdk = { version = "26.1.0" }
+
+# ── Release profile: aggressively minimal WASM binary ──────────────────────
+[profile.release]
+opt-level     = "z"       # optimize for binary size
+overflow-checks = true    # keep arithmetic safety
+debug         = 0
+strip         = "symbols"
+debug-assertions = false
+panic         = "abort"
+codegen-units = 1
+lto           = true
+
+# ── Test profile: enables soroban test utilities ───────────────────────────
+[profile.test]
+opt-level = 0
+debug     = true

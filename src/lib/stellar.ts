@@ -131,46 +131,62 @@ export async function buildAndSubmitClaimTx(
     simResult as StellarRpc.Api.SimulateTransactionSuccessResponse
   );
 
-  // Step 2: claim_funds(secret, walletAddress)
+  // ── Step 1: Execute deploy_wallet transaction ─────────────────────────────
+  try {
+    const preparedDeploy = await server.prepareTransaction(simTx);
+    preparedDeploy.sign(relayer);
+
+    const deployFeeBump = TransactionBuilder.buildFeeBumpTransaction(
+      relayer,
+      FEE_BUMP_BASE_FEE,
+      preparedDeploy,
+      NETWORK_PASSPHRASE,
+    );
+    deployFeeBump.sign(relayer);
+
+    const deployRes = await server.sendTransaction(deployFeeBump);
+    if (deployRes.status !== "ERROR") {
+      await pollForConfirmation(server, deployRes.hash);
+    }
+  } catch (err) {
+    console.log("Wallet deploy step notice (may already be deployed):", err);
+  }
+
+  // Reload relayer account sequence number for claim transaction
+  const updatedAccount = await server.getAccount(relayer.publicKey());
+
+  // ── Step 2: Execute claim_funds transaction ───────────────────────────────
   const claimOp = escrowContract.call(
     "claim_funds",
     secretScVal,
     new Address(walletAddress.trim()).toScVal(),
   );
 
-  // Build final composite transaction with both operations
-  const finalTxBuilder = new TransactionBuilder(account, {
+  const claimTxBuilder = new TransactionBuilder(updatedAccount, {
     fee: BASE_FEE,
     networkPassphrase: NETWORK_PASSPHRASE,
   })
-    .addOperation(deployOp)
     .addOperation(claimOp)
     .setTimeout(30);
 
-  const finalTx     = finalTxBuilder.build();
-  const preparedTx  = await server.prepareTransaction(finalTx);
+  const claimTx = claimTxBuilder.build();
+  const preparedClaim = await server.prepareTransaction(claimTx);
+  preparedClaim.sign(relayer);
 
-  // Sign the inner transaction
-  preparedTx.sign(relayer);
-
-  // ── Wrap in Fee-Bump transaction ──────────────────────────────────────────
-  const feeBumpTx = TransactionBuilder.buildFeeBumpTransaction(
+  const claimFeeBump = TransactionBuilder.buildFeeBumpTransaction(
     relayer,
     FEE_BUMP_BASE_FEE,
-    preparedTx,
+    preparedClaim,
     NETWORK_PASSPHRASE,
   );
-  feeBumpTx.sign(relayer);
+  claimFeeBump.sign(relayer);
 
-  // ── Submit ────────────────────────────────────────────────────────────────
-  const response = await server.sendTransaction(feeBumpTx);
-
-  if (response.status === "ERROR") {
-    throw new Error(`Transaction rejected: ${JSON.stringify(response.errorResult)}`);
+  const claimRes = await server.sendTransaction(claimFeeBump);
+  if (claimRes.status === "ERROR") {
+    throw new Error(`Claim transaction rejected: ${JSON.stringify(claimRes.errorResult)}`);
   }
 
-  // ── Poll for confirmation ─────────────────────────────────────────────────
-  const txHash = response.hash;
+  const txHash = claimRes.hash;
   await pollForConfirmation(server, txHash);
 
   return { txHash, walletAddress };

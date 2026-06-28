@@ -8,15 +8,16 @@ import {
   nativeToScVal,
 } from "@stellar/stellar-sdk";
 
-const RPC_URL = process.env.NEXT_PUBLIC_STELLAR_RPC_URL || "https://soroban-testnet.stellar.org";
-const HORIZON_URL = process.env.NEXT_PUBLIC_STELLAR_HORIZON_URL || "https://horizon-testnet.stellar.org";
+const RPC_URL = (process.env.NEXT_PUBLIC_STELLAR_RPC_URL || "https://soroban-testnet.stellar.org").trim();
+const HORIZON_URL = (process.env.NEXT_PUBLIC_STELLAR_HORIZON_URL || "https://horizon-testnet.stellar.org").trim();
 
 /** Official Stellar Native Asset (XLM) contract on Soroban testnet/mainnet. */
-export const NATIVE_ASSET_CONTRACT_ID =
+export const NATIVE_ASSET_CONTRACT_ID = (
   process.env.NEXT_PUBLIC_NATIVE_ASSET_CONTRACT_ID ||
-  "CDLZFC3SYJYDZT7K67VZ75HPJGWGNRLRHGBHSIM5CXJZYA4VUBOPETB2";
+  "CDLZFC3SYJYDZT7K67VZ75HPJGWGNRLRHGBHSIM5CXJZYA4VUBOPETB2"
+).trim();
 
-const ESCROW_ID = process.env.NEXT_PUBLIC_ESCROW_CONTRACT_ID || "";
+const ESCROW_ID = (process.env.NEXT_PUBLIC_ESCROW_CONTRACT_ID || "").trim();
 const NETWORK_PASSPHRASE = "Test SDF Network ; September 2015";
 
 /** XLM uses 7 decimal places (stroops) on Soroban. */
@@ -42,7 +43,7 @@ function getHorizonServer(): Horizon.Server {
 export async function getXlmBalance(walletAddr: string): Promise<string> {
   try {
     const horizon = getHorizonServer();
-    const account = await horizon.loadAccount(walletAddr);
+    const account = await horizon.loadAccount(walletAddr.trim());
 
     const nativeEntry = account.balances.find(
       (b: Horizon.HorizonApi.BalanceLine) => b.asset_type === "native"
@@ -73,9 +74,10 @@ export async function buildLockFundsTx(
   durationLedgers: number = 17280
 ): Promise<string> {
   const server = getClientRpcServer();
-  const escrowContract = new Contract(ESCROW_ID);
+  const cleanWallet = walletAddr.trim();
+  const escrowContract = new Contract(ESCROW_ID.trim());
 
-  const account = await server.getAccount(walletAddr);
+  const account = await server.getAccount(cleanWallet);
 
   const secretBytes = new TextEncoder().encode(secretString);
   const secretHashBuffer = await crypto.subtle.digest("SHA-256", secretBytes);
@@ -84,8 +86,8 @@ export async function buildLockFundsTx(
   const amountBase = BigInt(Math.round(parseFloat(amountXlm) * XLM_SCALE));
   const amountScVal = nativeToScVal(amountBase, { type: "i128" });
 
-  const tokenScVal = new Address(NATIVE_ASSET_CONTRACT_ID).toScVal();
-  const senderScVal = new Address(walletAddr).toScVal();
+  const tokenScVal = new Address(NATIVE_ASSET_CONTRACT_ID.trim()).toScVal();
+  const senderScVal = new Address(cleanWallet).toScVal();
   const durationScVal = nativeToScVal(durationLedgers, { type: "u32" });
 
   const lockOp = escrowContract.call(

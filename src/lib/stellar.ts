@@ -27,10 +27,10 @@ import {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const NETWORK_PASSPHRASE  = Networks.TESTNET;
-const RPC_URL             = process.env.NEXT_PUBLIC_STELLAR_RPC_URL ?? "https://soroban-testnet.stellar.org";
-const ESCROW_CONTRACT_ID  = process.env.NEXT_PUBLIC_ESCROW_CONTRACT_ID  ?? "";
-const FACTORY_CONTRACT_ID = process.env.NEXT_PUBLIC_FACTORY_CONTRACT_ID ?? "";
-const RELAYER_SECRET_KEY  = process.env.RELAYER_SECRET_KEY ?? "";
+const RPC_URL             = (process.env.NEXT_PUBLIC_STELLAR_RPC_URL ?? "https://soroban-testnet.stellar.org").trim();
+const ESCROW_CONTRACT_ID  = (process.env.NEXT_PUBLIC_ESCROW_CONTRACT_ID  ?? "").trim();
+const FACTORY_CONTRACT_ID = (process.env.NEXT_PUBLIC_FACTORY_CONTRACT_ID ?? "").trim();
+const RELAYER_SECRET_KEY  = (process.env.RELAYER_SECRET_KEY ?? "").trim();
 
 // Fee-Bump base fee: 10x the inner transaction base fee to ensure priority
 const FEE_BUMP_BASE_FEE = (parseInt(BASE_FEE) * 10).toString();
@@ -135,7 +135,7 @@ export async function buildAndSubmitClaimTx(
   const claimOp = escrowContract.call(
     "claim_funds",
     secretScVal,
-    new Address(walletAddress).toScVal(),
+    new Address(walletAddress.trim()).toScVal(),
   );
 
   // Build final composite transaction with both operations

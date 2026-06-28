@@ -158,7 +158,7 @@ export default function DashboardPage() {
               <div className="flex flex-col gap-2">
                 <h2 className="font-display text-xl font-bold text-white">Connect Your Wallet</h2>
                 <p className="text-sm text-slate-400">
-                  Connect Freighter to view balances and deploy escrow contracts on Stellar testnet.
+                  Connect Freighter to view balances and lock native XLM into non-custodial escrow vaults.
                 </p>
               </div>
               <Button variant="primary" size="lg" fullWidth onClick={connectWallet} disabled={connecting}>
@@ -181,7 +181,7 @@ export default function DashboardPage() {
               <div className="flex flex-col gap-6 lg:col-span-2">
                 {status !== "success" ? (
                   <GlassCard className="flex flex-col gap-6">
-                    <h2 className="font-display text-lg font-bold text-white">Deploy Escrow Vault</h2>
+                    <h2 className="font-display text-lg font-bold text-white">Lock XLM & Create Claim Link</h2>
 
                     <form onSubmit={handleLockFunds} className="flex flex-col gap-6">
                       <div className="flex flex-col gap-2">
@@ -277,7 +277,7 @@ export default function DashboardPage() {
                         {busy ? (
                           <><Loader2 className="h-4 w-4 animate-spin" /> Processing…</>
                         ) : (
-                          <><Plus className="h-4 w-4" /> Deploy Escrow Contract</>
+                          <><Lock className="h-4 w-4" /> Lock XLM in Escrow</>
                         )}
                       </Button>
                     </form>
@@ -288,7 +288,7 @@ export default function DashboardPage() {
                       <Check className="h-8 w-8 text-emerald-400" />
                     </div>
                     <div className="flex flex-col gap-2">
-                      <h2 className="font-display text-xl font-bold text-white">Vault Deployed</h2>
+                      <h2 className="font-display text-xl font-bold text-white">XLM Locked Successfully!</h2>
                       <p className="text-sm text-slate-400">Share this claim link with your recipient.</p>
                     </div>
                     <div className="w-full rounded-xl border border-white/15 bg-black/40">

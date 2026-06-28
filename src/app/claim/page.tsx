@@ -78,8 +78,8 @@ function ClaimPageInner() {
       }
 
       const { startRegistration } = await import("@simplewebauthn/browser");
-      const rpcUrl = process.env.NEXT_PUBLIC_STELLAR_RPC_URL || "https://soroban-testnet.stellar.org";
-      const escrowId = process.env.NEXT_PUBLIC_ESCROW_CONTRACT_ID || "";
+      const rpcUrl = (process.env.NEXT_PUBLIC_STELLAR_RPC_URL || "https://soroban-testnet.stellar.org").trim();
+      const escrowId = (process.env.NEXT_PUBLIC_ESCROW_CONTRACT_ID || "").trim();
 
       const { rpc: StellarRpc } = await import("@stellar/stellar-sdk");
       const server = new StellarRpc.Server(rpcUrl);

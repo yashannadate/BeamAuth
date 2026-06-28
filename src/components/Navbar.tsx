@@ -31,11 +31,11 @@ export default function Navbar() {
     : null;
 
   useEffect(() => {
-    if (!walletAddress) {
-      setBalance(null);
-      return;
-    }
     let active = true;
+    if (!walletAddress) {
+      Promise.resolve().then(() => { if (active) setBalance(null); });
+      return () => { active = false; };
+    }
     getXlmBalance(walletAddress)
       .then((bal) => { if (active) setBalance(bal); })
       .catch(() => { if (active) setBalance(null); });

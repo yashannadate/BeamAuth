@@ -5,8 +5,10 @@ import { createContext, useContext, useState, useEffect, ReactNode, useCallback 
 interface WalletContextType {
   walletAddress: string | null;
   connecting: boolean;
+  connectionError: string | null;
   connectWallet: () => Promise<void>;
   disconnectWallet: () => void;
+  clearConnectionError: () => void;
 }
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
@@ -14,6 +16,7 @@ const WalletContext = createContext<WalletContextType | undefined>(undefined);
 export function WalletProvider({ children }: { children: ReactNode }) {
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [connecting, setConnecting] = useState(false);
+  const [connectionError, setConnectionError] = useState<string | null>(null);
 
   // Check if wallet is already authorized and connected on mount
   useEffect(() => {
@@ -60,17 +63,27 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
   const connectWallet = useCallback(async () => {
     setConnecting(true);
+    setConnectionError(null);
     try {
       const { isConnected, setAllowed, getAddress } = await import("@stellar/freighter-api");
       const connected = await isConnected();
       if (!connected) {
-        alert("Freighter browser extension is not installed. Please install it to connect.");
+        setConnectionError("Freighter browser extension is not installed. Please install it to connect.");
         return;
       }
 
-      await setAllowed();
+      try {
+        await setAllowed();
+      } catch (allowErr) {
+        // User rejected the Freighter connection popup
+        setConnectionError("Wallet connection was rejected. Please try again.");
+        console.warn("Freighter setAllowed rejected:", allowErr);
+        return;
+      }
+
       const { address, error } = await getAddress();
       if (error) {
+        setConnectionError(`Freighter error: ${error}`);
         console.error("Freighter connection error:", error);
         return;
       }
@@ -79,6 +92,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         setWalletAddress(address);
       }
     } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to connect wallet.";
+      setConnectionError(message);
       console.error("Failed to connect Freighter:", err);
     } finally {
       setConnecting(false);
@@ -87,10 +102,15 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
   const disconnectWallet = useCallback(() => {
     setWalletAddress(null);
+    setConnectionError(null);
+  }, []);
+
+  const clearConnectionError = useCallback(() => {
+    setConnectionError(null);
   }, []);
 
   return (
-    <WalletContext.Provider value={{ walletAddress, connecting, connectWallet, disconnectWallet }}>
+    <WalletContext.Provider value={{ walletAddress, connecting, connectionError, connectWallet, disconnectWallet, clearConnectionError }}>
       {children}
     </WalletContext.Provider>
   );

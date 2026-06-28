@@ -5,8 +5,8 @@
  *
  * This endpoint is the backend engine of BeamAuth. It receives the
  * WebAuthn assertion from the mobile client, parses the biometric signature,
- * builds a composite Soroban transaction, wraps it in a Fee-Bump (so the
- * user pays zero gas), and submits it to Stellar Testnet.
+ * builds a composite Soroban transaction (deploy passkey wallet + claim native XLM),
+ * wraps it in a Fee-Bump so the user pays zero gas, and submits it to Stellar Testnet.
  *
  * POST /api/relay
  * Body: { secret: string, webauthnResponse: AuthenticationResponseJSON }
@@ -44,17 +44,27 @@ export async function OPTIONS() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
+  // ── 1. Parse request body ─────────────────────────────────────────────────
+  let body: RelayRequestBody;
   try {
-    // ── 1. Parse request body ───────────────────────────────────────────────
-    const body = await req.json() as RelayRequestBody;
+    body = await req.json() as RelayRequestBody;
+  } catch {
+    return errorResponse(400, "Invalid JSON in request body");
+  }
+
+  try {
     const { secret, webauthnResponse } = body;
 
     if (!secret || !webauthnResponse) {
       return errorResponse(400, "Missing required fields: secret, webauthnResponse");
     }
 
+    if (!webauthnResponse.response || !webauthnResponse.response.clientDataJSON) {
+      return errorResponse(400, "Malformed webauthnResponse: missing response.clientDataJSON");
+    }
+
     // ── 2. Decode WebAuthn components ───────────────────────────────────────
-    const { response: assertionResponse } = webauthnResponse;
+    const { response: assertionResponse } = body.webauthnResponse;
     const clientDataJSON = atob(
       assertionResponse.clientDataJSON.replace(/-/g, "+").replace(/_/g, "/")
     );
@@ -101,9 +111,9 @@ export async function POST(req: NextRequest) {
     console.log("[relay] Signature:   ", signatureHex ? signatureHex.slice(0, 16) + "..." : "none");
 
     // ── 4. Convert secret string → hex ──────────────────────────────────────
-    const secretHex = bytesToHex(new TextEncoder().encode(secret));
+    const secretHex = bytesToHex(new TextEncoder().encode(body.secret));
 
-    // ── 7. Build and submit the Fee-Bump transaction ─────────────────────────
+    // ── 5. Build and submit the Fee-Bump transaction ─────────────────────────
     console.log("[relay] Building Fee-Bump transaction on Stellar Testnet...");
     const { txHash, walletAddress } = await buildAndSubmitClaimTx({
       secretHex,
@@ -114,7 +124,7 @@ export async function POST(req: NextRequest) {
     console.log("[relay] ✅ Transaction confirmed:", txHash);
     console.log("[relay] 📦 Wallet deployed at:  ", walletAddress);
 
-    // ── 8. Return success ────────────────────────────────────────────────────
+    // ── 6. Return success ────────────────────────────────────────────────────
     return NextResponse.json(
       { success: true, txHash, walletAddress },
       { status: 200, headers: CORS_HEADERS }

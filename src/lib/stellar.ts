@@ -78,7 +78,7 @@ export interface RelayResult {
 /**
  * Builds, simulates, and submits a Fee-Bump transaction that:
  *   1. Calls Factory.deploy_wallet(pub_key) → deploys the Passkey Smart Wallet
- *   2. Calls Escrow.claim_funds(secret, wallet_address) → releases USDC
+ *   2. Calls Escrow.claim_funds(secret, wallet_address) → releases native XLM
  *
  * The outer Fee-Bump is signed by the relayer keypair so the new user
  * pays zero network fees.

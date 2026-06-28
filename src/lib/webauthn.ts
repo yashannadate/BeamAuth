@@ -226,7 +226,7 @@ export function extractAuthDataFromAttestationObject(attObj: Uint8Array): Uint8A
   }
 
   // The value starts after the marker
-  let valOffset = index + marker.length;
+  const valOffset = index + marker.length;
   const typeByte = attObj[valOffset];
 
   if (typeByte === 0x58) { // Byte string with 1-byte length

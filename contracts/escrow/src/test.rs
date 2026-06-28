@@ -44,14 +44,14 @@ impl TestEnv {
         let alice = Address::generate(&env);
         let bob   = Address::generate(&env);
 
-        // ── Deploy a mock USDC token (Stellar Asset Contract) ──
+        // ── Deploy native XLM token (Stellar Asset Contract) ──
         let token_admin  = Address::generate(&env);
         let token_wasm   = env.register_stellar_asset_contract_v2(token_admin.clone());
         let token_address = token_wasm.address();
 
-        // Mint 1_000 USDC (7 decimals, so 1_000 * 10^7 = 10_000_000_000 units) to Alice
+        // Mint 1,000 XLM (7 decimals) to Alice
         let token_sac = StellarAssetClient::new(&env, &token_address);
-        token_sac.mint(&alice, &1_000_0000000_i128); // 1,000 USDC in 7-decimal units
+        token_sac.mint(&alice, &1_000_0000000_i128);
 
         // ── Deploy Escrow contract ──
         let escrow_id = env.register(EscrowContract, ());
@@ -91,14 +91,14 @@ impl TestEnv {
 // ─────────────────────────────────────────────────────────────────────────────
 //  Test 1 — Successful Claim
 // ─────────────────────────────────────────────────────────────────────────────
-/// Locks 50 USDC under a secret hash, then claims it with the correct secret.
+/// Locks 50 XLM under a secret hash, then claims it with the correct secret.
 /// Verifies the full balance movement: Alice → Escrow → Bob.
 #[test]
 fn test_successful_claim() {
     let t = TestEnv::setup();
 
     let secret      = b"super_secret_passphrase_42";
-    let amount      = 50_0000000_i128;  // 50 USDC
+    let amount      = 50_0000000_i128;  // 50 XLM
     let duration    = 1_000_u32;        // expires in 1,000 ledgers
 
     let hash        = t.hash_secret(secret);
@@ -113,7 +113,7 @@ fn test_successful_claim() {
         &duration,
     );
 
-    // Escrow now holds the USDC
+    // Escrow now holds the XLM
     assert_eq!(t.escrow_balance(), amount);
     assert_eq!(t.alice_balance(),  alice_start - amount);
     assert_eq!(t.bob_balance(),    0);
@@ -126,11 +126,11 @@ fn test_successful_claim() {
     t.escrow.claim_funds(&secret_bytes, &t.bob);
 
     // Bob received the full amount
-    assert_eq!(t.bob_balance(),    amount,          "Bob should have received 50 USDC");
+    assert_eq!(t.bob_balance(),    amount,          "Bob should have received 50 XLM");
     assert_eq!(t.escrow_balance(), 0,               "Escrow should be empty");
     assert!(!t.escrow.has_lock(&hash),              "Lock entry should be deleted");
 
-    std::println!("[PASS] test_successful_claim — Alice locked 50 USDC, Bob claimed successfully.");
+    std::println!("[PASS] test_successful_claim — Alice locked 50 XLM, Bob claimed successfully.");
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -144,7 +144,7 @@ fn test_expired_link() {
     let t = TestEnv::setup();
 
     let secret   = b"another_secret_12345";
-    let amount   = 10_0000000_i128;   // 10 USDC
+    let amount   = 10_0000000_i128;   // 10 XLM
     let duration = 100_u32;           // only 100 ledgers (~500 seconds)
 
     let hash = t.hash_secret(secret);
@@ -183,7 +183,7 @@ fn test_invalid_secret() {
 
     let real_secret  = b"correct_secret_horse_battery_staple";
     let wrong_secret = b"this_is_completely_wrong_secret";
-    let amount       = 25_0000000_i128; // 25 USDC
+    let amount       = 25_0000000_i128; // 25 XLM
     let duration     = 1_000_u32;
 
     let hash = t.hash_secret(real_secret);
@@ -230,7 +230,7 @@ fn test_duplicate_lock_rejected() {
 // ─────────────────────────────────────────────────────────────────────────────
 //  Test 5 — Sender Reclaims Expired Funds
 // ─────────────────────────────────────────────────────────────────────────────
-/// Verifies that the original sender can reclaim their USDC after expiration.
+/// Verifies that the original sender can reclaim their XLM after expiration.
 #[test]
 fn test_sender_reclaim_after_expiry() {
     let t = TestEnv::setup();
@@ -253,12 +253,12 @@ fn test_sender_reclaim_after_expiry() {
     // ── Reclaim ──
     t.escrow.reclaim_funds(&hash);
 
-    // Alice gets her USDC back
+    // Alice gets her XLM back
     assert_eq!(t.alice_balance(), alice_start,   "Alice should recover full amount");
     assert_eq!(t.escrow_balance(), 0,            "Escrow should be empty after reclaim");
     assert!(!t.escrow.has_lock(&hash),           "Lock entry should be deleted");
 
-    std::println!("[PASS] test_sender_reclaim_after_expiry — Alice reclaimed 30 USDC.");
+    std::println!("[PASS] test_sender_reclaim_after_expiry — Alice reclaimed 30 XLM.");
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

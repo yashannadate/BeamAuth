@@ -1,6 +1,6 @@
 //! # BeamAuth — Escrow Vault Contract
 //!
-//! Locks USDC under a SHA-256 hash of a secret.  When the receiver provides
+//! Locks native XLM under a SHA-256 hash of a secret.  When the receiver provides
 //! the pre-image (the secret), funds are atomically released to their newly
 //! deployed Passkey Smart Wallet.
 //!
@@ -36,7 +36,7 @@ pub struct LockedFunds {
     pub sender: Address,
     /// SAC (Stellar Asset Contract) address of the token being escrowed.
     pub token: Address,
-    /// Amount in the token's base unit (e.g., stroops for XLM, 1e-7 USDC units).
+    /// Amount in the token's base unit (stroops — 1e-7 XLM).
     pub amount: i128,
     /// Soroban ledger number after which `claim_funds` will reject the claim.
     pub expiration_ledger: u32,
@@ -127,7 +127,7 @@ impl EscrowContract {
     /// * `sender`           — The funding address; must approve this call.
     /// * `hash`             — SHA-256(secret).  32-byte digest produced off-chain.
     /// * `amount`           — Token units to lock (must be > 0).
-    /// * `token`            — SAC address of the token (e.g., Testnet USDC).
+    /// * `token`            — SAC address of the token (Stellar Native Asset / XLM).
     /// * `duration_ledgers` — How many ledgers until the link expires (~5s each).
     ///
     /// # Events

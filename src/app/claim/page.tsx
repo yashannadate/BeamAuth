@@ -103,7 +103,7 @@ function ClaimPageInner() {
           try {
             const response = await server.getEvents({
               startLedger,
-              filters: [{ type: "contract", contractIds: [escrowId], topics: [["AAAADgAAAAdjbGFpbWVkAAAAAAA="]] }],
+              filters: [{ type: "contract", contractIds: [escrowId], topics: [["AAAADwAAAAdjbGFpbWVkAA=="]] }],
               limit: 10,
             });
             if (response.events.length > 0) {

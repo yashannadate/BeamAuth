@@ -58,6 +58,10 @@ jobs:
         working-directory: contracts
         run: cargo test -p factory --verbose -- --nocapture
 
+      - name: Run PoDRegistry unit tests
+        working-directory: contracts
+        run: cargo test -p pod-registry --verbose -- --nocapture
+
       - name: Run full workspace test suite
         working-directory: contracts
         run: |

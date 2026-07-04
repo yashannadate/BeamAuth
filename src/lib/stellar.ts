@@ -26,14 +26,15 @@ import {
 //  Config
 // ─────────────────────────────────────────────────────────────────────────────
 
-const NETWORK_PASSPHRASE  = Networks.TESTNET;
+export const NETWORK_PASSPHRASE  = Networks.TESTNET;
 const RPC_URL             = (process.env.NEXT_PUBLIC_STELLAR_RPC_URL ?? "https://soroban-testnet.stellar.org").trim();
 const ESCROW_CONTRACT_ID  = (process.env.NEXT_PUBLIC_ESCROW_CONTRACT_ID  ?? "").trim();
 const FACTORY_CONTRACT_ID = (process.env.NEXT_PUBLIC_FACTORY_CONTRACT_ID ?? "").trim();
 const RELAYER_SECRET_KEY  = (process.env.RELAYER_SECRET_KEY ?? "").trim();
 
+export { BASE_FEE };
 // Fee-Bump base fee: 10x the inner transaction base fee to ensure priority
-const FEE_BUMP_BASE_FEE = (parseInt(BASE_FEE) * 10).toString();
+export const FEE_BUMP_BASE_FEE = (parseInt(BASE_FEE) * 10).toString();
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  RPC Client singleton
@@ -85,6 +86,61 @@ export interface RelayResult {
  *
  * @returns txHash and the newly deployed wallet address
  */
+async function prepareAndSubmitWithRetry(
+  server: StellarRpc.Server,
+  relayer: Keypair,
+  txBuilderFn: (account: any) => Promise<TransactionBuilder> | TransactionBuilder,
+  maxRetries = 4
+): Promise<string> {
+  let lastError: any = null;
+
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const account = await server.getAccount(relayer.publicKey());
+      const txBuilder = await txBuilderFn(account);
+      const tx = txBuilder.build();
+
+      const preparedTx = await server.prepareTransaction(tx);
+      preparedTx.sign(relayer);
+
+      const feeBump = TransactionBuilder.buildFeeBumpTransaction(
+        relayer,
+        FEE_BUMP_BASE_FEE,
+        preparedTx,
+        NETWORK_PASSPHRASE,
+      );
+      feeBump.sign(relayer);
+
+      const response = await server.sendTransaction(feeBump);
+      if (response.status === "ERROR") {
+        const errorResultStr = JSON.stringify(response.errorResult);
+        if (errorResultStr.includes("txBadSeq") || errorResultStr.includes("-5")) {
+          console.warn(`[relay] txBadSeq detected (sendTransaction) on attempt ${attempt + 1}. Retrying in 2.5s...`);
+          lastError = new Error(`Transaction failed: ${errorResultStr}`);
+          await sleep(2500);
+          continue;
+        }
+        throw new Error(`Transaction rejected: ${errorResultStr}`);
+      }
+
+      const txHash = response.hash;
+      await pollForConfirmation(server, txHash);
+      return txHash;
+    } catch (err: any) {
+      const errMsg = err.message || "";
+      if (errMsg.includes("txBadSeq") || errMsg.includes("-5")) {
+        console.warn(`[relay] txBadSeq detected (exception) on attempt ${attempt + 1}. Retrying in 2.5s...`);
+        lastError = err;
+        await sleep(2500);
+        continue;
+      }
+      throw err;
+    }
+  }
+
+  throw lastError || new Error("Transaction submission failed after maximum retries due to sequence number mismatch.");
+}
+
 export async function buildAndSubmitClaimTx(
   params: RelayParams
 ): Promise<RelayResult> {
@@ -106,88 +162,82 @@ export async function buildAndSubmitClaimTx(
   const pubKeyScVal = nativeToScVal(pubKeyBytes, { type: "bytes" });
   const secretScVal = nativeToScVal(secretBytes, { type: "bytes" });
 
-  // Step 1: deploy_wallet(pub_key)
-  const deployOp = factoryContract.call(
-    "deploy_wallet",
+  // ── Derive deterministic wallet address ───────────────────────────────────
+  const getAddrOp = factoryContract.call(
+    "get_wallet_address",
     pubKeyScVal,
   );
 
-  // Simulate deploy-only tx to get the wallet address from return value
-  const simTxBuilder = new TransactionBuilder(account, {
+  const simGetAddrBuilder = new TransactionBuilder(account, {
     fee: BASE_FEE,
     networkPassphrase: NETWORK_PASSPHRASE,
   })
-    .addOperation(deployOp)
+    .addOperation(getAddrOp)
     .setTimeout(30);
 
-  const simTx     = simTxBuilder.build();
-  const simResult = await server.simulateTransaction(simTx);
+  const simGetAddrTx = simGetAddrBuilder.build();
+  const simGetAddrRes = await server.simulateTransaction(simGetAddrTx);
 
-  if (StellarRpc.Api.isSimulationError(simResult)) {
-    throw new Error(`Wallet deploy simulation failed: ${(simResult as StellarRpc.Api.SimulateTransactionErrorResponse).error}`);
+  if (StellarRpc.Api.isSimulationError(simGetAddrRes)) {
+    throw new Error(`Wallet address derivation failed: ${(simGetAddrRes as StellarRpc.Api.SimulateTransactionErrorResponse).error}`);
   }
 
   const walletAddress = extractAddressFromSimulation(
-    simResult as StellarRpc.Api.SimulateTransactionSuccessResponse
+    simGetAddrRes as StellarRpc.Api.SimulateTransactionSuccessResponse
   );
 
-  // ── Step 1: Execute deploy_wallet transaction ─────────────────────────────
+  // ── Check if the wallet contract is already deployed ─────────────────────
+  let isDeployed = false;
   try {
-    const preparedDeploy = await server.prepareTransaction(simTx);
-    preparedDeploy.sign(relayer);
-
-    const deployFeeBump = TransactionBuilder.buildFeeBumpTransaction(
-      relayer,
-      FEE_BUMP_BASE_FEE,
-      preparedDeploy,
-      NETWORK_PASSPHRASE,
-    );
-    deployFeeBump.sign(relayer);
-
-    const deployRes = await server.sendTransaction(deployFeeBump);
-    if (deployRes.status !== "ERROR") {
-      await pollForConfirmation(server, deployRes.hash);
+    const walletContract = new Contract(walletAddress);
+    const getPubKeyOp = walletContract.call("get_public_key");
+    const checkTxBuilder = new TransactionBuilder(account, {
+      fee: BASE_FEE,
+      networkPassphrase: NETWORK_PASSPHRASE,
+    })
+      .addOperation(getPubKeyOp)
+      .setTimeout(30);
+    const checkTx = checkTxBuilder.build();
+    const checkSim = await server.simulateTransaction(checkTx);
+    if (!StellarRpc.Api.isSimulationError(checkSim)) {
+      isDeployed = true;
     }
-  } catch (err) {
-    console.log("Wallet deploy step notice (may already be deployed):", err);
+  } catch (e) {
+    isDeployed = false;
   }
 
-  // Reload relayer account sequence number for claim transaction
-  const updatedAccount = await server.getAccount(relayer.publicKey());
+  console.log(`[relay] Wallet status for ${walletAddress}: ${isDeployed ? "already deployed" : "not deployed"}`);
+
+  // ── Step 1: Execute deploy_wallet transaction if NOT deployed ──────────────
+  if (!isDeployed) {
+    await prepareAndSubmitWithRetry(server, relayer, (acc) => {
+      const deployOp = factoryContract.call(
+        "deploy_wallet",
+        pubKeyScVal,
+      );
+      return new TransactionBuilder(acc, {
+        fee: BASE_FEE,
+        networkPassphrase: NETWORK_PASSPHRASE,
+      })
+        .addOperation(deployOp)
+        .setTimeout(30);
+    });
+  }
 
   // ── Step 2: Execute claim_funds transaction ───────────────────────────────
-  const claimOp = escrowContract.call(
-    "claim_funds",
-    secretScVal,
-    new Address(walletAddress.trim()).toScVal(),
-  );
-
-  const claimTxBuilder = new TransactionBuilder(updatedAccount, {
-    fee: BASE_FEE,
-    networkPassphrase: NETWORK_PASSPHRASE,
-  })
-    .addOperation(claimOp)
-    .setTimeout(30);
-
-  const claimTx = claimTxBuilder.build();
-  const preparedClaim = await server.prepareTransaction(claimTx);
-  preparedClaim.sign(relayer);
-
-  const claimFeeBump = TransactionBuilder.buildFeeBumpTransaction(
-    relayer,
-    FEE_BUMP_BASE_FEE,
-    preparedClaim,
-    NETWORK_PASSPHRASE,
-  );
-  claimFeeBump.sign(relayer);
-
-  const claimRes = await server.sendTransaction(claimFeeBump);
-  if (claimRes.status === "ERROR") {
-    throw new Error(`Claim transaction rejected: ${JSON.stringify(claimRes.errorResult)}`);
-  }
-
-  const txHash = claimRes.hash;
-  await pollForConfirmation(server, txHash);
+  const txHash = await prepareAndSubmitWithRetry(server, relayer, (acc) => {
+    const claimOp = escrowContract.call(
+      "claim_funds",
+      secretScVal,
+      new Address(walletAddress.trim()).toScVal(),
+    );
+    return new TransactionBuilder(acc, {
+      fee: BASE_FEE,
+      networkPassphrase: NETWORK_PASSPHRASE,
+    })
+      .addOperation(claimOp)
+      .setTimeout(30);
+  });
 
   return { txHash, walletAddress };
 }
@@ -217,7 +267,7 @@ export async function watchForClaimedEvent(
           {
             type:        "contract",
             contractIds: [ESCROW_CONTRACT_ID],
-            topics:      [["AAAADgAAAAdjbGFpbWVkAAAAAAA="]], // "claimed" symbol XDR
+            topics:      [["AAAADwAAAAdjbGFpbWVkAA=="]], // "claimed" symbol XDR
           },
         ],
         limit: 10,

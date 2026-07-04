@@ -23,8 +23,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     async function checkExistingConnection() {
       try {
         const { isConnected, getAddress } = await import("@stellar/freighter-api");
-        const connected = await isConnected();
-        if (connected) {
+        const connectedRes = await isConnected();
+        if (connectedRes && connectedRes.isConnected) {
           // Verify if user already allowed the app and has an address
           const { address, error } = await getAddress();
           if (address && !error) {
@@ -64,10 +64,17 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const connectWallet = useCallback(async () => {
     setConnecting(true);
     setConnectionError(null);
+
+    // Set a safety timeout to prevent indefinite "Connecting..." state if the extension popup is closed manually
+    const timeoutId = setTimeout(() => {
+      setConnecting(false);
+      setConnectionError("Wallet connection timed out. Please try again.");
+    }, 20000); // 20 seconds timeout
+
     try {
       const { isConnected, setAllowed, getAddress } = await import("@stellar/freighter-api");
-      const connected = await isConnected();
-      if (!connected) {
+      const connectedRes = await isConnected();
+      if (!connectedRes || !connectedRes.isConnected) {
         setConnectionError("Freighter browser extension is not installed. Please install it to connect.");
         return;
       }
@@ -96,6 +103,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       setConnectionError(message);
       console.error("Failed to connect Freighter:", err);
     } finally {
+      clearTimeout(timeoutId);
       setConnecting(false);
     }
   }, []);

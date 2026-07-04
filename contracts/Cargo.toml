@@ -3,6 +3,7 @@ members = [
     "escrow",
     "passkey_wallet",
     "factory",
+    "pod_registry",
 ]
 resolver = "2"
 

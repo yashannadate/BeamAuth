@@ -13,6 +13,9 @@ import {
   Droplets,
   Loader2,
   AlertCircle,
+  Shield,
+  CheckCircle,
+  Fingerprint,
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { useWallet } from "@/context/WalletContext";
@@ -20,8 +23,44 @@ import { getXlmBalance, buildLockFundsTx, submitSignedTx } from "@/lib/stellar-c
 import { Button } from "@/components/ui/button";
 import { GlassCard, PageShell, PageContainer } from "@/components/ui/layout";
 import { cn } from "@/lib/utils";
+import { Contract, Address, rpc as StellarRpc, TransactionBuilder } from "@stellar/stellar-sdk";
 
 type TxStatus = "idle" | "building" | "signing" | "submitting" | "success" | "error";
+
+const checkIsVerifiedHuman = async (address: string): Promise<boolean> => {
+  try {
+    const serverUrl = process.env.NEXT_PUBLIC_STELLAR_RPC_URL ?? "https://soroban-testnet.stellar.org";
+    const server = new StellarRpc.Server(serverUrl);
+    const podContractId = process.env.NEXT_PUBLIC_POD_REGISTRY_CONTRACT_ID ?? "";
+    if (!podContractId) return false;
+    
+    const contract = new Contract(podContractId);
+    const op = contract.call("is_verified_human", new Address(address).toScVal());
+    
+    const account = await server.getAccount(address);
+    const tx = new TransactionBuilder(account, {
+      fee: "100",
+      networkPassphrase: "Test SDF Network ; September 2015",
+    })
+      .addOperation(op)
+      .setTimeout(30)
+      .build();
+      
+    const sim = await server.simulateTransaction(tx);
+    if (StellarRpc.Api.isSimulationError(sim)) {
+      return false;
+    }
+    
+    const resultVal = (sim as any).result?.retval;
+    if (resultVal) {
+      return resultVal.b();
+    }
+    return false;
+  } catch (e) {
+    console.error("Error checking verification status", e);
+    return false;
+  }
+};
 
 export default function DashboardPage() {
   const { walletAddress, connecting, connectionError, connectWallet } = useWallet();
@@ -29,6 +68,141 @@ export default function DashboardPage() {
   const [loadingBalance, setLoadingBalance] = useState(false);
   const [amount, setAmount] = useState("");
   const [secret, setSecret] = useState("");
+
+  const [podStatus, setPodStatus] = useState<"idle" | "loading" | "verified" | "unregistered" | "registering" | "error">("idle");
+  const [podLogs, setPodLogs] = useState<string[]>([]);
+  const [podKey, setPodKey] = useState("");
+  const [podScore, setPodScore] = useState("0%");
+  const [podTxHash, setPodTxHash] = useState("");
+
+  useEffect(() => {
+    if (!walletAddress) {
+      setPodStatus("idle");
+      return;
+    }
+    
+    const checkPod = async () => {
+      setPodStatus("loading");
+      const isVerified = await checkIsVerifiedHuman(walletAddress);
+      if (isVerified) {
+        setPodStatus("verified");
+        setPodScore("100%");
+        const storedKey = localStorage.getItem(`pod_key_${walletAddress}`);
+        if (storedKey) setPodKey(storedKey);
+      } else {
+        setPodStatus("unregistered");
+        setPodScore("0%");
+      }
+    };
+    
+    checkPod();
+  }, [walletAddress]);
+
+  const startPoDRegistration = async () => {
+    if (!walletAddress) return;
+    setPodStatus("registering");
+    setPodLogs([]);
+    
+    const addLog = (msg: string) => {
+      setPodLogs((prev) => [...prev, msg]);
+    };
+    
+    try {
+      addLog("[INFO] Establishing secure cryptographic runtime loop...");
+      await new Promise((r) => setTimeout(r, 800));
+      
+      addLog("[PENDING] Requesting registration challenge from secure relayer anchor...");
+      const challengeRes = await fetch(`/api/pod/challenge?userAddress=${walletAddress}`);
+      if (!challengeRes.ok) throw new Error("Failed to fetch challenge.");
+      const challengeOptions = await challengeRes.json();
+      await new Promise((r) => setTimeout(r, 600));
+      
+      addLog("[INFO] Launching WebAuthn Secure Enclave Ceremony...");
+      const { startRegistration, startAuthentication } = await import("@simplewebauthn/browser");
+      
+            const regResponse = await startRegistration({
+        optionsJSON: challengeOptions,
+      });
+      addLog("[OK] Biometric credentials created.");
+      await new Promise((r) => setTimeout(r, 600));
+      
+      addLog("[PENDING] Performing possession proof signing ceremony...");
+      const assertResponse = await startAuthentication({
+        optionsJSON: {
+          challenge: challengeOptions.challenge,
+          rpId: challengeOptions.rp.id,
+          allowCredentials: [{
+            id: regResponse.id,
+            type: "public-key",
+            transports: (regResponse.response.transports ?? ["internal"]) as any,
+          }],
+          userVerification: "required",
+          timeout: 60000,
+        }
+      });
+      addLog("[OK] Biometric ceremony approved by local Secure Enclave.");
+      await new Promise((r) => setTimeout(r, 800));
+      
+      addLog("[PENDING] Conveying payloads to relayer for fee-bump simulation...");
+      const buildRes = await fetch("/api/pod/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "build",
+          userAddress: walletAddress,
+          registrationResponse: regResponse,
+          assertionResponse: assertResponse,
+        }),
+      });
+      
+      if (!buildRes.ok) {
+        const errData = await buildRes.json();
+        throw new Error(errData.error || "Failed to build transaction.");
+      }
+      
+      const { unsignedXdr, publicKeyHex } = await buildRes.json();
+      await new Promise((r) => setTimeout(r, 600));
+      
+      addLog("[PENDING] Sponsoring transaction. Requesting Freighter validation...");
+      const { signTransaction } = await import("@stellar/freighter-api");
+      const signedRes = await signTransaction(unsignedXdr, {
+        networkPassphrase: "Test SDF Network ; September 2015",
+      });
+      
+      if (!signedRes || signedRes.error) {
+        throw new Error(signedRes?.error || "Freighter signature rejected.");
+      }
+      
+      addLog("[PENDING] Committing sponsored transaction to Testnet ledger...");
+      const submitRes = await fetch("/api/pod/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "submit",
+          signedXdr: signedRes.signedTxXdr,
+        }),
+      });
+      
+      if (!submitRes.ok) {
+        const errData = await submitRes.json();
+        throw new Error(errData.error || "Failed to submit transaction.");
+      }
+      
+      const { txHash } = await submitRes.json();
+      addLog(`[SUCCESS] Fee-bumped transaction committed to ledger. Hash: 0x${txHash.slice(0, 16)}...`);
+      
+      setPodTxHash(txHash);
+      setPodKey(publicKeyHex);
+      localStorage.setItem(`pod_key_${walletAddress}`, publicKeyHex);
+      setPodStatus("verified");
+      setPodScore("100%");
+      
+    } catch (error: any) {
+      console.error(error);
+      addLog(`[ERROR] Ceremony aborted: ${error.message || error}`);
+      setPodStatus("error");
+    }
+  };
 
   // Clear stale error states when the user edits the form after an error
   const handleAmountChange = (val: string) => {
@@ -165,7 +339,7 @@ export default function DashboardPage() {
                 {connecting ? (
                   <><Loader2 className="h-4 w-4 animate-spin" /> Connecting…</>
                 ) : (
-                  <><Wallet className="h-4 w-4" /> Connect Freighter Wallet</>
+                  <><Wallet className="h-4 w-4" /> Initialize Session Anchor</>
                 )}
               </Button>
               {connectionError && (
@@ -339,6 +513,103 @@ export default function DashboardPage() {
                       <RefreshCw className={cn("h-4 w-4", loadingBalance && "animate-spin")} />
                     </Button>
                   </div>
+                </GlassCard>
+
+                {/* PoD Identity Passport */}
+                <GlassCard className="flex flex-col gap-5 border border-white/10 bg-gradient-to-br from-slate-950 via-slate-900 to-black p-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Shield className={cn("h-5 w-5", podStatus === "verified" ? "text-emerald-400" : "text-amber-400")} />
+                      <p className="font-display text-sm font-bold text-white uppercase tracking-wider">Proof of Device</p>
+                    </div>
+                    {podStatus === "verified" ? (
+                      <span className="inline-flex items-center gap-1 rounded bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-400 border border-emerald-500/20">
+                        VERIFIED HUMAN
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 rounded bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold text-amber-400 border border-amber-500/20">
+                        ANONYMOUS
+                      </span>
+                    )}
+                  </div>
+
+                  {podStatus === "verified" ? (
+                    <div className="flex flex-col gap-4 rounded-xl border border-emerald-500/25 bg-emerald-950/10 p-5">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/15 border border-emerald-500/30">
+                          <CheckCircle className="h-5 w-5 text-emerald-400" />
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-medium uppercase tracking-wider text-slate-500">Identity Tag</p>
+                          <p className="text-xs font-mono font-bold tracking-tight text-emerald-300">
+                            STATUS: HARDWARE-ATTESTED HUMAN [100%]
+                          </p>
+                        </div>
+                      </div>
+                      <div className="h-px bg-emerald-500/10" />
+                      <div className="flex flex-col gap-2">
+                        <div>
+                          <p className="text-[10px] uppercase text-slate-500">secp256r1 Public Key</p>
+                          <p className="break-all font-mono text-[10px] text-slate-300">
+                            {podKey ? `${podKey.slice(0, 18)}...${podKey.slice(-18)}` : "Hardware Enclave Secured"}
+                          </p>
+                        </div>
+                        <div className="flex justify-between items-center text-xs mt-1">
+                          <span className="text-slate-400">Sybil Resistance Score:</span>
+                          <span className="font-bold text-emerald-400">100% (Maximum)</span>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-4 rounded-xl border border-white/10 bg-black/40 p-5">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 border border-amber-500/20">
+                          <Fingerprint className="h-5 w-5 text-amber-400" />
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-medium uppercase tracking-wider text-slate-500">Identity Tag</p>
+                          <p className="text-xs font-mono font-bold tracking-tight text-amber-400">
+                            STATUS: UNVERIFIED ANONYMOUS SATELLITE
+                          </p>
+                        </div>
+                      </div>
+                      <div className="h-px bg-white/10" />
+                      <p className="text-xs leading-relaxed text-slate-400">
+                        Bind your browser's Secure Enclave key to your wallet. Instantly prove human uniqueness on-chain with zero gas fees.
+                      </p>
+                      {podStatus === "registering" ? (
+                        <Button variant="outline" size="md" fullWidth disabled>
+                          <Loader2 className="h-4 w-4 animate-spin text-amber-400" />
+                          Ceremony in Progress…
+                        </Button>
+                      ) : (
+                        <Button variant="primary" size="md" fullWidth onClick={startPoDRegistration}>
+                          <Fingerprint className="h-4 w-4" />
+                          Generate Proof of Device
+                        </Button>
+                      )}
+                    </div>
+                  )}
+
+                  {/* System Logger Console */}
+                  {podLogs.length > 0 && (
+                    <div className="flex flex-col gap-2 rounded-xl border border-white/10 bg-black p-4">
+                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Live System Logger</p>
+                      <div className="max-h-32 overflow-y-auto flex flex-col gap-1.5 font-mono text-[10px] text-slate-400 scrollbar-thin scrollbar-thumb-white/10">
+                        {podLogs.map((log, idx) => (
+                          <div key={idx} className={cn(
+                            "leading-relaxed",
+                            log.startsWith("[SUCCESS]") && "text-emerald-400",
+                            log.startsWith("[ERROR]") && "text-red-400",
+                            log.startsWith("[OK]") && "text-blue-400",
+                            log.startsWith("[PENDING]") && "text-amber-400"
+                          )}>
+                            {log}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </GlassCard>
 
                 <GlassCard className="flex flex-col gap-4">

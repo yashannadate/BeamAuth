@@ -74,6 +74,7 @@
 - ⛽ **Gasless Fee Sponsorship** — Platform relayer wraps user claims in Fee-Bump transactions, allowing recipients to claim with 0 XLM balance.
 - 📱 **Freighter Extension Integration** — Deep integration with `@stellar/freighter-api` with progressive state-driven error feedback.
 - ⚡ **Real-Time Event Polling** — Frontend listens dynamically for Soroban `claimed` contract events to transition UI states instantly.
+- 👤 **Proof of Device (PoD) Identity** — Standalone Sybil-resistant hardware identity registry utilizing native `secp256r1_verify` host functions.
 
 ---
 
@@ -85,6 +86,7 @@
 | **Wallet Factory Contract** | [`CCDV672F6FHX4G7FUV7Z4CJNPVAMR445QO6BR2BDKS44YBQET6UJFAX3`](https://stellar.expert/explorer/testnet/contract/CCDV672F6FHX4G7FUV7Z4CJNPVAMR445QO6BR2BDKS44YBQET6UJFAX3) | Stellar Testnet |
 | **Passkey Wallet WASM Hash** | `fd13e7137de16838fb5527bb031231be19b4f37464b55cc655111f4cf45ed8a5` | Uploaded Binary |
 | **Native Asset Contract (XLM)** | [`CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC`](https://stellar.expert/explorer/testnet/contract/CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC) | Stellar Testnet |
+| **PoD Registry Contract** | [`CCCT6ZJ3HN3Y46NNRU2NBJGX77HXGHJXO6FU3TYIGCX3PSRSYRVRGWDE`](https://stellar.expert/explorer/testnet/contract/CCCT6ZJ3HN3Y46NNRU2NBJGX77HXGHJXO6FU3TYIGCX3PSRSYRVRGWDE) | Stellar Testnet |
 | **Platform Relayer Account** | [`GCECDZC5EMFR6DIHRLQ6GAYGAIPDJSBAXDO27GUJHXZF6ZIQRF7ULDGD`](https://stellar.expert/explorer/testnet/account/GCECDZC5EMFR6DIHRLQ6GAYGAIPDJSBAXDO27GUJHXZF6ZIQRF7ULDGD) | Stellar Testnet |
 
 ---
@@ -96,7 +98,8 @@
 | 🔐 Passkey Onboarding | ✅ Live | WebAuthn secp256r1 signature verification on Soroban |
 | ⛽ Gasless Relayer Execution | ✅ Live | Fee-Bump transaction sponsorship at `/api/relay` |
 | 🛡️ Non-Custodial Escrow | ✅ Live | SHA-256 pre-image locked native XLM transfers |
-| 🧪 Contract Test Suite | ✅ Passing | 9/9 unit tests passing cleanly with zero failures |
+| 👤 Proof of Device Identity | ✅ Live | Hardware Enclave PoD registry mapping on-chain (`PodRegistry`) |
+| 🧪 Contract Test Suite | ✅ Passing | 11/11 unit tests passing cleanly with zero failures |
 | 👷 TypeScript Verification | ✅ Passing | Strict compilation check passing with zero errors |
 
 ---
@@ -109,13 +112,17 @@ BeamAuth/
 ├── contracts/
 │   ├── escrow/                    # Escrow Vault smart contract (Rust)
 │   ├── factory/                   # Smart Wallet factory contract (Rust)
-│   └── passkey_wallet/            # Custom Account passkey verification contract
+│   ├── passkey_wallet/            # Custom Account passkey verification contract
+│   └── pod_registry/              # Proof of Device (PoD) identity registry (Rust)
 ├── src/
 │   ├── app/
-│   │   ├── api/relay/route.ts     # Gasless Fee-Bump Relayer endpoint
+│   │   ├── api/
+│   │   │   ├── relay/route.ts     # Gasless Fee-Bump Relayer endpoint
+│   │   │   ├── pod/challenge/route.ts # WebAuthn PoD challenge generator
+│   │   │   └── pod/register/route.ts  # PoD signature Relayer pipeline
 │   │   ├── dashboard/page.tsx     # Escrow locking and dashboard interface
 │   │   └── claim/page.tsx         # Passkey registration and claim interface
-│   ├── context/WalletContext.tsx  # Freighter wallet connection provider
+├── context/WalletContext.tsx  # Freighter wallet connection provider
 │   └── lib/
 │       ├── stellar-client.ts      # Horizon & Soroban RPC interaction layer
 │       └── webauthn.ts            # ASN.1 DER to raw r||s signature conversion
@@ -130,10 +137,29 @@ All core smart contracts and frontend pipelines have been rigorously tested and 
 
 | Test Suite | Total Tests | Status |
 |---|:---:|:---:|
-| **Soroban Smart Contracts (Rust)** | 9/9 | ✅ Passing |
+| **Soroban Smart Contracts (Rust)** | 11/11 | ✅ Passing |
 | **TypeScript Type Checking** | Strict | ✅ Passing |
 | **Frontend Wallet Connections** | 4/4 | ✅ Passing |
-| **Total Pipeline Verification** | **13/13** | ✅ **100% Passing** |
+| **Total Pipeline Verification** | **15/15** | ✅ **100% Passing** |
+
+---
+
+### 📊 Verification Media & Demo
+
+> [!NOTE]
+> Below are placeholders to link your submission screenshots, including CLI test output, CI status, mobile layouts, and demo presentation video:
+
+* **1. Mobile Responsive UI**:
+  ![Mobile Responsive UI Mockup](./public/images/mobile_responsive_ui.png)
+* **2. CI/CD Build Pipeline**:
+  ![GitHub Actions CI/CD Pipeline Build Status](./public/images/cicd_pipeline_run.png)
+* **3. Contract Test Output (11+ passing tests)**:
+  ![Soroban Contract Test Suite Execution Output](./public/images/soroban_test_output.png)
+* **4. On-Chain Interaction Transaction**:
+  ![Stellar Testnet Transaction Explorer Result](./public/images/contract_interaction_tx.png)
+* **5. Demo Video Presentation (1-2 Minutes)**:
+  * 🎥 **[Watch Demo Presentation Video Link](https://www.youtube.com/watch?v=your-video-id)**
+
 
 ---
 

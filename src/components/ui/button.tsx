@@ -1,95 +1,111 @@
 import { forwardRef } from "react";
 import { cn } from "@/lib/utils";
 
-type ButtonVariant = "primary" | "outline" | "glass" | "ghost";
-type ButtonSize = "sm" | "md" | "lg";
-
-const variants: Record<ButtonVariant, string> = {
-  primary: [
-    "relative overflow-hidden font-semibold text-white",
-    "bg-gradient-to-br from-blue-600 via-blue-500 to-sky-400",
-    "border border-blue-400/30",
-    "shadow-[0_0_20px_rgba(59,130,246,0.35),inset_0_1px_0_rgba(255,255,255,0.15)]",
-    "hover:shadow-[0_0_32px_rgba(59,130,246,0.5),inset_0_1px_0_rgba(255,255,255,0.2)]",
-    "hover:brightness-110",
-    "active:scale-[0.98]",
-  ].join(" "),
-  outline: [
-    "font-medium text-white",
-    "border border-white/20 bg-transparent",
-    "hover:border-blue-500/50 hover:bg-blue-500/10",
-    "active:scale-[0.98]",
-  ].join(" "),
-  glass: [
-    "font-medium text-white",
-    "border border-white/10 bg-white/5 backdrop-blur-md",
-    "hover:bg-white/10 hover:border-white/20",
-    "active:scale-[0.98]",
-  ].join(" "),
-  ghost: [
-    "font-medium text-slate-400",
-    "hover:text-blue-400 hover:bg-white/5",
-    "active:scale-[0.98]",
-  ].join(" "),
-};
-
-const sizes: Record<ButtonSize, string> = {
-  sm: "h-9 gap-1.5 rounded-lg px-3.5 text-xs",
-  md: "h-10 gap-2 rounded-xl px-5 text-sm",
-  lg: "h-12 gap-2.5 rounded-xl px-7 text-sm",
-};
-
-export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: ButtonVariant;
-  size?: ButtonSize;
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: "primary" | "secondary" | "outline" | "ghost";
+  size?: "sm" | "md" | "lg";
   fullWidth?: boolean;
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = "primary", size = "md", fullWidth, children, ...props }, ref) => (
-    <button
-      ref={ref}
-      className={cn(
-        "inline-flex items-center justify-center transition-all duration-200 disabled:pointer-events-none disabled:opacity-50",
-        variants[variant],
-        sizes[size],
-        fullWidth && "w-full",
-        className
-      )}
-      {...props}
-    >
-      {children}
-    </button>
-  )
+  (
+    {
+      className,
+      variant = "primary",
+      size = "md",
+      fullWidth = false,
+      children,
+      disabled,
+      ...props
+    },
+    ref
+  ) => {
+    return (
+      <button
+        ref={ref}
+        disabled={disabled}
+        className={cn(
+          "inline-flex items-center justify-center rounded-full font-sans font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-[#15349e]/50 disabled:opacity-50 disabled:pointer-events-none select-none cursor-pointer",
+          
+          variant === "primary" &&
+            "bg-[#15349e] text-white shadow-[0_4px_20px_rgba(21,52,158,0.25)] hover:bg-[#102a83] hover:shadow-[0_6px_25px_rgba(21,52,158,0.35)] active:scale-[0.98] border border-[#15349e]",
+          
+          variant === "secondary" &&
+            "bg-slate-100 text-[#0a0f1d] border border-slate-200 hover:bg-slate-200 active:scale-[0.98]",
+          
+          variant === "outline" &&
+            "border border-slate-200/80 bg-white text-[#0a0f1d] hover:border-slate-300 hover:bg-slate-50 shadow-sm active:scale-[0.98]",
+          
+          variant === "ghost" &&
+            "text-slate-600 hover:bg-slate-100 hover:text-[#0a0f1d] active:scale-[0.98]",
+          
+          size === "sm" && "h-8 px-4 text-xs",
+          size === "md" && "h-10 px-6 text-sm",
+          size === "lg" && "h-12 px-8 text-base",
+          
+          fullWidth && "w-full",
+          className
+        )}
+        {...props}
+      >
+        {children}
+      </button>
+    );
+  }
 );
 Button.displayName = "Button";
 
-export interface ButtonLinkProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
-  variant?: ButtonVariant;
-  size?: ButtonSize;
+export interface ButtonLinkProps
+  extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
+  href: string;
+  variant?: "primary" | "secondary" | "outline" | "ghost";
+  size?: "sm" | "md" | "lg";
   fullWidth?: boolean;
 }
 
-export function ButtonLink({
-  className,
-  variant = "primary",
-  size = "md",
-  fullWidth,
-  children,
-  ...props
-}: ButtonLinkProps) {
-  return (
-    <a
-      className={cn(
-        "inline-flex items-center justify-center transition-all duration-200 no-underline",
-        variants[variant],
-        sizes[size],
-        fullWidth && "w-full",
-        className
-      )}
-      {...props}
-    >
-      {children}
-    </a>
-  );
-}
+export const ButtonLink = forwardRef<HTMLAnchorElement, ButtonLinkProps>(
+  (
+    {
+      className,
+      variant = "primary",
+      size = "md",
+      fullWidth = false,
+      children,
+      ...props
+    },
+    ref
+  ) => {
+    return (
+      <a
+        ref={ref}
+        className={cn(
+          "inline-flex items-center justify-center rounded-full font-sans font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-[#15349e]/50 no-underline select-none cursor-pointer",
+          
+          variant === "primary" &&
+            "bg-[#15349e] text-white shadow-[0_4px_20px_rgba(21,52,158,0.25)] hover:bg-[#102a83] hover:shadow-[0_6px_25px_rgba(21,52,158,0.35)] active:scale-[0.98] border border-[#15349e]",
+          
+          variant === "secondary" &&
+            "bg-slate-100 text-[#0a0f1d] border border-slate-200 hover:bg-slate-200 active:scale-[0.98]",
+          
+          variant === "outline" &&
+            "border border-slate-200/80 bg-white text-[#0a0f1d] hover:border-slate-300 hover:bg-slate-50 shadow-sm active:scale-[0.98]",
+          
+          variant === "ghost" &&
+            "text-slate-600 hover:bg-slate-100 hover:text-[#0a0f1d] active:scale-[0.98]",
+          
+          size === "sm" && "h-8 px-4 text-xs",
+          size === "md" && "h-10 px-6 text-sm",
+          size === "lg" && "h-12 px-8 text-base",
+          
+          fullWidth && "w-full",
+          className
+        )}
+        {...props}
+      >
+        {children}
+      </a>
+    );
+  }
+);
+ButtonLink.displayName = "ButtonLink";

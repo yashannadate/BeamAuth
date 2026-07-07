@@ -24,7 +24,8 @@ const config: Config = {
         "beam-glass":    "rgba(10,22,40,0.6)",
       },
       fontFamily: {
-        sans: ["Inter", "system-ui", "sans-serif"],
+        sans: ["Poppins", "system-ui", "sans-serif"],
+        display: ["Almarena Neue", "system-ui", "sans-serif"],
         mono: ["JetBrains Mono", "Fira Code", "monospace"],
       },
       backgroundImage: {

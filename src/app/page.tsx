@@ -1,235 +1,174 @@
 "use client";
 
-/**
- * app/page.tsx
- *
- * A high-fidelity, tactical landing page inspired by premium card-deck layouts.
- * Features a vibrant neon-emerald background, bold display typography, custom
- * isometric line-art SVGs, and responsive framer-motion entrance transitions.
- */
-
-import { motion } from "framer-motion";
-import { useWallet } from "@/context/WalletContext";
-import { Wallet, Zap, Shield, ArrowRight } from "lucide-react";
-import Link from "next/link";
-import { useState } from "react";
+import {
+  Terminal,
+  Shield,
+  Cpu,
+  Lock,
+  Fingerprint,
+  Zap,
+  ArrowRight,
+  FileCode,
+  Layers,
+  Key,
+  Timer,
+  ShieldCheck,
+  ChevronDown,
+} from "lucide-react";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import ExecutionTimeline from "@/components/ExecutionTimeline";
+import { ButtonLink } from "@/components/ui/button";
+import { PageShell, PageContainer, GlassCard } from "@/components/ui/layout";
 
 export default function HomePage() {
-  const { walletAddress, connectWallet, connecting } = useWallet();
-  const [hoveredLink, setHoveredLink] = useState<string | null>(null);
-
-  // Entrance animations setup
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.15,
-        delayChildren: 0.1,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { y: 45, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: { type: "spring" as const, stiffness: 100, damping: 14 },
-    },
-  };
-
-  const leftIllustVariants = {
-    hidden: { x: -120, opacity: 0, scale: 0.8, rotate: -5 },
-    visible: {
-      x: 0,
-      opacity: 1,
-      scale: 1,
-      rotate: 0,
-      transition: { type: "spring" as const, stiffness: 70, damping: 14, delay: 0.35 },
-    },
-  };
-
-  const rightIllustVariants = {
-    hidden: { x: 120, opacity: 0, scale: 0.8, rotate: 5 },
-    visible: {
-      x: 0,
-      opacity: 1,
-      scale: 1,
-      rotate: 0,
-      transition: { type: "spring" as const, stiffness: 70, damping: 14, delay: 0.45 },
-    },
-  };
-
   return (
-    <div className="min-h-screen w-full bg-[#00f082] text-slate-950 select-none overflow-x-hidden font-sans relative flex flex-col justify-between">
-      {/* Navbar */}
-      <header className="w-full px-6 py-5 max-w-7xl mx-auto flex items-center justify-between z-50">
-        <Link href="/" className="font-display text-2xl font-black tracking-tighter text-slate-950 no-underline hover:opacity-90">
-          BeamAuth
-        </Link>
+    <PageShell>
+      <Navbar />
 
-        <nav className="hidden md:flex items-center gap-8">
-          {[
-            { name: "Home", href: "/" },
-            { name: "Dashboard", href: "/dashboard" },
-            { name: "Escrows", href: "/dashboard" },
-            { name: "Identity Portal", href: "/dashboard" },
-          ].map((link) => (
-            <Link
-              key={link.name}
-              href={link.href}
-              className="text-sm font-semibold tracking-wide text-slate-950/80 hover:text-slate-950 transition-colors no-underline relative py-1"
-              onMouseEnter={() => setHoveredLink(link.name)}
-              onMouseLeave={() => setHoveredLink(null)}
-            >
-              {link.name}
-              {hoveredLink === link.name && (
-                <motion.div
-                  layoutId="nav-underline"
-                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-slate-950 rounded-full"
-                  transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                />
-              )}
-            </Link>
-          ))}
-        </nav>
+      <main className="flex-1 font-sans">
+        {/* ══════════════════════════════════════════════════
+            HERO SECTION - INVOKO LIGHT AESTHETIC (#F4F6FB, DEEP NAVY, ELECTRIC COBALT BLUE)
+        ═════════════════════════════════════════════════ */}
+        <section className="relative pt-20 pb-28 md:pt-32 md:pb-36 px-4 sm:px-6 overflow-hidden text-center font-sans">
+          <PageContainer className="flex flex-col items-center max-w-4xl mx-auto gap-6 z-10">
+            
+            {/* Headline with Invoko-style glowing orb badge replacing 'o' in Crypto */}
+            <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-[#0a0f1d] leading-[1.1]">
+              Send Crypt
+              <span className="inline-flex items-center justify-center w-12 h-12 md:w-16 md:h-16 rounded-full bg-[#15349e] text-white shadow-[0_0_35px_rgba(21,52,158,0.45)] mx-1.5 -my-2 align-middle hover:scale-105 transition-transform cursor-pointer">
+                <Fingerprint className="w-6 h-6 md:w-8 md:h-8" />
+              </span>
+              . Claim With a Glance.
+            </h1>
 
-        <div>
-          {walletAddress ? (
-            <Link
-              href="/dashboard"
-              className="inline-flex h-10 items-center justify-center rounded-full bg-slate-950 px-6 text-xs font-bold uppercase tracking-wider text-[#00f082] no-underline hover:bg-slate-900 hover:scale-105 active:scale-95 transition-all duration-200 shadow-lg shadow-black/10"
-            >
-              Anchor: {walletAddress.slice(0, 4)}...{walletAddress.slice(-4)}
-            </Link>
-          ) : (
-            <button
-              onClick={connectWallet}
-              disabled={connecting}
-              className="inline-flex h-10 items-center justify-center rounded-full bg-slate-950 px-6 text-xs font-bold uppercase tracking-wider text-[#00f082] no-underline hover:bg-slate-900 hover:scale-105 active:scale-95 transition-all duration-200 disabled:opacity-70 shadow-lg shadow-black/10 cursor-pointer"
-            >
-              <Wallet className="h-3.5 w-3.5 mr-1.5" />
-              {connecting ? "Connecting..." : "Initialize Session Anchor"}
-            </button>
-          )}
-        </div>
-      </header>
+            {/* Sub-headline */}
+            <p className="text-slate-500 font-normal text-base md:text-lg max-w-xl mx-auto leading-relaxed mt-2">
+              Lock funds on-chain. Send a link. The recipient authenticates with Face ID to settle the transaction—no app required.
+            </p>
 
-      {/* Hero Section */}
-      <main className="flex-1 w-full max-w-7xl mx-auto px-6 flex flex-col justify-center items-center py-10 md:py-16 relative">
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="text-center max-w-3xl flex flex-col items-center gap-6 md:gap-8 z-20"
-        >
-          <motion.h1 
-            variants={itemVariants}
-            className="font-display text-5xl sm:text-7xl md:text-8xl font-black tracking-tighter leading-[0.9] text-slate-950 text-center"
-          >
-            Beam Once.<br/>
-            Enjoy Again.
-          </motion.h1>
+            {/* CTA Area */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 w-full sm:w-auto font-sans">
+              <ButtonLink
+                href="/dashboard"
+                variant="primary"
+                size="lg"
+                className="font-sans text-sm font-bold shadow-[0_4px_20px_rgba(21,52,158,0.25)] rounded-full px-8 py-3.5"
+              >
+                Access Cipher Dashboard
+              </ButtonLink>
+            </div>
 
-          <motion.p 
-            variants={itemVariants}
-            className="text-slate-900/80 text-sm sm:text-base md:text-lg max-w-lg leading-relaxed font-semibold"
-          >
-            Turn every transfer into extra value with smart biometric rewards, on-demand hardware smart wallets, and sponsored zero-fee claims.
-          </motion.p>
+            {/* Scroll Indicator */}
+            <div className="mt-12 flex flex-col items-center gap-2 text-[10px] font-bold tracking-widest text-slate-400 uppercase font-mono">
+              <span>SCROLL TO SEE BEAMAUTH IN CONTEXT</span>
+              <ChevronDown className="h-4 w-4 animate-bounce text-[#15349e]" />
+            </div>
 
-          <motion.div variants={itemVariants}>
-            <Link
-              href="/dashboard"
-              className="inline-flex h-14 items-center justify-center gap-3 rounded-full bg-slate-950 px-8 text-sm font-bold uppercase tracking-widest text-[#00f082] no-underline hover:bg-slate-900 hover:scale-105 active:scale-95 transition-all duration-200 shadow-xl shadow-black/20 group"
-            >
-              <Zap className="h-4 w-4 fill-current text-[#00f082]" />
-              Start Beaming Today
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </Link>
-          </motion.div>
-        </motion.div>
+            {/* Protocol Metrics Ribbon (Clean White Card) */}
+            <div className="grid grid-cols-2 md:grid-cols-4 md:divide-x md:divide-slate-200/80 bg-white border border-slate-200/80 rounded-2xl p-6 sm:p-8 w-full max-w-4xl mt-10 gap-y-8 md:gap-y-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+              
+              {/* Metric 1 */}
+              <div className="flex flex-col items-center justify-center text-center px-4">
+                <div className="flex items-center gap-2.5">
+                  <Zap className="h-6 w-6 text-amber-500 shrink-0" />
+                  <span className="text-3xl font-extrabold text-[#0a0f1d]">$0.00</span>
+                </div>
+                <span className="text-xs uppercase tracking-widest font-mono text-slate-500 font-bold mt-1">
+                  Gas Fee (Relayed)
+                </span>
+              </div>
 
-        {/* Left Illustration: Money Stack */}
-        <motion.div
-          variants={leftIllustVariants}
-          initial="hidden"
-          animate="visible"
-          className="absolute left-0 bottom-0 hidden lg:block pointer-events-none select-none z-10"
-        >
-          <svg className="w-72 h-72 text-slate-950" viewBox="0 0 200 200" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="20" cy="180" r="1.5" fill="currentColor" opacity="0.3" />
-            <circle cx="40" cy="180" r="1.5" fill="currentColor" opacity="0.3" />
-            <circle cx="60" cy="180" r="1.5" fill="currentColor" opacity="0.3" />
-            <circle cx="80" cy="180" r="1.5" fill="currentColor" opacity="0.3" />
-            <circle cx="30" cy="190" r="1.5" fill="currentColor" opacity="0.3" />
-            <circle cx="50" cy="190" r="1.5" fill="currentColor" opacity="0.3" />
-            <circle cx="70" cy="190" r="1.5" fill="currentColor" opacity="0.3" />
+              {/* Metric 2 */}
+              <div className="flex flex-col items-center justify-center text-center px-4">
+                <div className="flex items-center gap-2.5">
+                  <Fingerprint className="h-6 w-6 text-[#15349e] shrink-0" />
+                  <span className="text-3xl font-extrabold text-[#0a0f1d]">secp256r1</span>
+                </div>
+                <span className="text-xs uppercase tracking-widest font-mono text-slate-500 font-bold mt-1">
+                  Native Curve
+                </span>
+              </div>
 
-            {/* Isometric cash bills */}
-            <path d="M60,110 L110,85 L160,110 L110,135 Z" fill="#D1FAE5" />
-            <path d="M60,110 L60,118 L110,143 L110,135" />
-            <path d="M160,110 L160,118 L110,143 L110,135" />
+              {/* Metric 3 */}
+              <div className="flex flex-col items-center justify-center text-center px-4">
+                <div className="flex items-center gap-2.5">
+                  <Timer className="h-6 w-6 text-indigo-600 shrink-0" />
+                  <span className="text-3xl font-extrabold text-[#0a0f1d]">&lt; 2s</span>
+                </div>
+                <span className="text-xs uppercase tracking-widest font-mono text-slate-500 font-bold mt-1">
+                  Atomic Settle
+                </span>
+              </div>
 
-            <path d="M60,95 L110,70 L160,95 L110,120 Z" fill="#A7F3D0" />
-            <path d="M60,95 L60,103 L110,128 L110,120" />
-            <path d="M160,95 L160,103 L110,128 L110,120" />
+              {/* Metric 4 */}
+              <div className="flex flex-col items-center justify-center text-center px-4">
+                <div className="flex items-center gap-2.5">
+                  <ShieldCheck className="h-6 w-6 text-emerald-600 shrink-0" />
+                  <span className="text-3xl font-extrabold text-[#0a0f1d]">100%</span>
+                </div>
+                <span className="text-xs uppercase tracking-widest font-mono text-slate-500 font-bold mt-1">
+                  Sybil Proof
+                </span>
+              </div>
 
-            <path d="M60,80 L110,55 L160,80 L110,105 Z" fill="#6EE7B7" />
-            <path d="M60,80 L60,88 L110,113 L110,105" />
-            <path d="M160,80 L160,88 L110,113 L110,105" />
+            </div>
 
-            {/* Bill details */}
-            <ellipse cx="110" cy="80" rx="16" ry="8" />
-            <text x="110" y="83" fontFamily="monospace" fontSize="10" fontWeight="bold" textAnchor="middle" fill="currentColor">$</text>
+          </PageContainer>
+        </section>
 
-            {/* Coin Stack */}
-            <path d="M30,120 L30,128 A10,5 0 0,0 50,128 L50,120 A10,5 0 0,0 30,120 Z" fill="#A7F3D0" />
-            <path d="M30,128 L30,136 A10,5 0 0,0 50,136 L50,128" />
-            <path d="M30,136 L30,144 A10,5 0 0,0 50,144 L50,136" />
+        {/* ══════════════════════════════════════════════════
+            HOW IT WORKS (Execution Pipeline Timeline)
+        ═════════════════════════════════════════════════ */}
+        <section className="py-24 border-t border-slate-200/80 bg-[#f4f6fb] relative font-sans">
+          <PageContainer>
+            <ExecutionTimeline />
+          </PageContainer>
+        </section>
 
-            {/* Standing Coin */}
-            <circle cx="45" cy="155" r="10" fill="#D1FAE5" />
-            <text x="45" y="158" fontFamily="monospace" fontSize="8" fontWeight="bold" textAnchor="middle" fill="currentColor">S</text>
-          </svg>
-        </motion.div>
-
-        {/* Right Illustration: Secure Enclave Vault Box */}
-        <motion.div
-          variants={rightIllustVariants}
-          initial="hidden"
-          animate="visible"
-          className="absolute right-0 bottom-0 hidden lg:block pointer-events-none select-none z-10"
-        >
-          <svg className="w-72 h-72 text-slate-950" viewBox="0 0 200 200" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-            {/* Isometric Vault Box (representing passkey Smart Wallet) */}
-            <path d="M100,50 L160,80 L100,110 L40,80 Z" fill="#D1FAE5" />
-            <path d="M40,80 L40,140 L100,170 L100,110 Z" fill="#A7F3D0" />
-            <path d="M160,80 L160,140 L100,170 L100,110 Z" fill="#6EE7B7" />
-
-            {/* Lock detail */}
-            <ellipse cx="70" cy="130" rx="8" ry="12" />
-            <line x1="70" y1="142" x2="70" y2="152" />
-
-            {/* Coins dropping */}
-            <ellipse cx="100" cy="20" rx="8" ry="4" fill="#6EE7B7" />
-            <line x1="100" y1="20" x2="100" y2="40" strokeDasharray="3,3" />
-
-            <ellipse cx="125" cy="35" rx="8" ry="4" fill="#D1FAE5" />
-            <line x1="125" y1="35" x2="125" y2="60" strokeDasharray="3,3" />
-
-            <ellipse cx="140" cy="115" rx="8" ry="4" fill="#D1FAE5" />
-            <ellipse cx="145" cy="125" rx="8" ry="4" fill="#A7F3D0" />
-          </svg>
-        </motion.div>
+        {/* ══════════════════════════════════════════════════
+            EXPLORE TERMINAL SPECS (Teaser to Features Page)
+        ═════════════════════════════════════════════════ */}
+        <section className="py-24 border-t border-slate-200/80 bg-[#f4f6fb] relative font-sans">
+          <PageContainer>
+            <div className="rounded-3xl border border-slate-200/80 bg-white p-8 sm:p-12 flex flex-col md:flex-row items-center justify-between gap-8 font-sans shadow-[0_10px_35px_rgba(0,0,0,0.04)]">
+              <div className="flex flex-col gap-3">
+                <div className="inline-flex items-center gap-2 text-xs font-bold text-[#15349e] uppercase tracking-wider">
+                  <Cpu className="h-4 w-4" />
+                  <span>DEEP TECHNICAL SPECS</span>
+                </div>
+                <h2 className="text-2xl sm:text-4xl font-extrabold text-[#0a0f1d] tracking-tight">
+                  Explore the Biometric Cipher Terminal Architecture.
+                </h2>
+                <p className="text-slate-500 text-sm sm:text-base max-w-xl font-normal leading-relaxed">
+                  Dive into our 100% sybil-resistant Proof of Device registry, zero-gas relayer layer, and native Soroban secp256r1 host engine.
+                </p>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-4 shrink-0 w-full md:w-auto">
+                <ButtonLink
+                  href="/features"
+                  variant="outline"
+                  size="lg"
+                  className="font-sans text-sm font-bold uppercase tracking-wide border-slate-200 hover:border-[#15349e] rounded-full"
+                >
+                  View Features &amp; Specs
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </ButtonLink>
+                <ButtonLink
+                  href="/dashboard"
+                  variant="primary"
+                  size="lg"
+                  className="font-sans text-sm font-bold uppercase tracking-wide shadow-[0_4px_20px_rgba(21,52,158,0.25)] rounded-full"
+                >
+                  Launch Terminal
+                </ButtonLink>
+              </div>
+            </div>
+          </PageContainer>
+        </section>
       </main>
 
-      {/* Footer */}
-      <footer className="w-full py-6 px-6 max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-950/10 text-xs font-semibold text-slate-950/65 z-20">
-        <p>© 2026 BeamAuth. Built for Stellar Journey to Mastery 2.0.</p>
-        <p>Released under the MIT License.</p>
-      </footer>
-    </div>
+      <Footer />
+    </PageShell>
   );
 }

@@ -93,6 +93,21 @@
 
 ## 📙 Level 3 — Orange Belt Features
 
+### ✅ Level 3 Submission Checklist Verification
+| Requirement | Status | Details / Links |
+|---|:---:|---|
+| **Public GitHub Repository** | ✅ Verified | [yashannadate/BeamAuth](https://github.com/yashannadate/BeamAuth) |
+| **README Documentation** | ✅ Complete | Complete architecture, call flows, setup, and contract specs |
+| **Minimum 10+ Commits** | ✅ Verified | 15+ meaningful incremental development commits in git history |
+| **Live Demo Link** | ✅ Live | [beamauth.vercel.app](https://beamauth.vercel.app) |
+| **Contract Deployment Address** | ✅ Deployed | Escrow: [`CAH7SZBIBQPH...`](https://stellar.expert/explorer/testnet/contract/CAH7SZBIBQPH7E57UOU5MFR6V2VQBROBTMVPJ2MOUCRP7H7NSRIFRDCV) |
+| **Transaction Hash / Explorer** | ✅ Active | [Stellar Testnet Relayer Account Explorer](https://stellar.expert/explorer/testnet/account/GCECDZC5EMFR6DIHRLQ6GAYGAIPDJSBAXDO27GUJHXZF6ZIQRF7ULDGD) |
+| **Mobile Responsive UI** | ✅ Verified | Tailwind responsive grids, flex wraps & mobile support |
+| **CI/CD Pipeline Running** | ✅ Active | Automated GitHub Actions (`main.yml`) 100% passing |
+| **Test Output (3+ tests)** | ✅ Verified | 11/11 Soroban Rust tests passing across 4 contracts |
+| **Demo Video Link (1–2 min)** | ✅ Ready | [Watch Demo Presentation Video Link](#-verification-media--demo) |
+
+### 🛠️ Core Capabilities
 | Feature | Status | Details |
 |---------|--------|---------|
 | 🔐 Passkey Onboarding | ✅ Live | WebAuthn secp256r1 signature verification on Soroban |

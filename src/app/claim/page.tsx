@@ -157,39 +157,39 @@ function ClaimPageInner() {
 
   return (
     <PageShell>
-      <main className="flex flex-1 items-center justify-center px-4 py-16">
+      <main className="flex flex-1 items-center justify-center px-4 py-16 font-sans">
         <PageContainer narrow className="flex flex-col items-center gap-8">
-          <Link href="/" className="flex items-center gap-2.5 no-underline">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-500 shadow-[0_0_16px_rgba(59,130,246,0.35)]">
+          <Link href="/" className="flex items-center gap-2.5 no-underline group">
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#15349e] text-white shadow-[0_0_15px_rgba(21,52,158,0.3)] group-hover:bg-[#102a83] transition-all">
               <Zap className="h-4 w-4 text-white" strokeWidth={2.5} />
             </span>
-            <span className="font-display text-xl font-bold text-white">BeamAuth</span>
+            <span className="font-display text-xl font-extrabold text-[#0a0f1d] tracking-tight">BeamAuth</span>
           </Link>
 
           {claimState === "idle" && (
-            <GlassCard className="w-full max-w-md">
+            <GlassCard className="w-full max-w-md border-slate-200/80 bg-white shadow-[0_10px_35px_rgba(0,0,0,0.04)] rounded-3xl p-8">
               <div className="flex flex-col items-center gap-6 text-center">
-                <div className="font-display text-5xl font-bold text-white">
+                <div className="font-display text-5xl font-extrabold text-[#0a0f1d] tracking-tight">
                   {amountDisplay}{" "}
-                  <span className="text-blue-400">{tokenDisplay}</span>
+                  <span className="text-[#15349e]">{tokenDisplay}</span>
                 </div>
-                <p className="text-sm text-slate-400">
-                  From <span className="font-semibold text-white">{senderDisplay}</span>
+                <p className="text-sm text-slate-500 font-normal">
+                  From <span className="font-bold text-[#0a0f1d]">{senderDisplay}</span>
                 </p>
-                <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-blue-400">
+                <span className="rounded-full border border-slate-200 bg-slate-100 px-3.5 py-1 text-xs font-bold text-[#15349e]">
                   Stellar Testnet Escrow
                 </span>
-                <div className="h-px w-full bg-white/10" />
-                <ul className="flex w-full flex-col gap-3 text-left text-sm text-slate-400">
+                <div className="h-px w-full bg-slate-100" />
+                <ul className="flex w-full flex-col gap-3 text-left text-sm text-slate-600 font-normal">
                   {steps.map(({ icon: Icon, text }) => (
                     <li key={text} className="flex items-center gap-3">
-                      <Icon className="h-4 w-4 shrink-0 text-blue-400" />
+                      <Icon className="h-4 w-4 shrink-0 text-[#15349e]" />
                       {text}
                     </li>
                   ))}
                 </ul>
-                <Button variant="primary" size="lg" fullWidth onClick={handleClaim}>
-                  <Fingerprint className="h-5 w-5" />
+                <Button variant="primary" size="lg" fullWidth onClick={handleClaim} className="font-sans font-bold uppercase tracking-wide text-xs shadow-[0_4px_20px_rgba(21,52,158,0.25)] rounded-full py-4">
+                  <Fingerprint className="h-5 w-5 mr-2" />
                   Verify &amp; Claim
                 </Button>
               </div>
@@ -197,34 +197,34 @@ function ClaimPageInner() {
           )}
 
           {claimState === "loading" && (
-            <GlassCard className="w-full max-w-md">
+            <GlassCard className="w-full max-w-md border-slate-200/80 bg-white shadow-[0_10px_35px_rgba(0,0,0,0.04)] rounded-3xl p-8">
               <div className="flex flex-col items-center gap-6 py-4 text-center">
-                <Loader2 className="h-10 w-10 animate-spin text-blue-400" />
-                <h2 className="font-display text-xl font-bold text-white">Processing Claim</h2>
-                <p className="text-sm text-slate-400">
+                <Loader2 className="h-10 w-10 animate-spin text-[#15349e]" />
+                <h2 className="font-display text-xl font-extrabold text-[#0a0f1d]">Processing Claim</h2>
+                <p className="text-sm text-slate-500 font-normal">
                   Verifying biometrics and settling on-chain…
                 </p>
-                <p className="font-mono text-xs text-blue-400">{timeElapsed}s elapsed</p>
+                <p className="font-mono text-xs text-[#15349e] font-bold">{timeElapsed}s elapsed</p>
               </div>
             </GlassCard>
           )}
 
           {claimState === "success" && (
-            <GlassCard className="w-full max-w-md">
+            <GlassCard className="w-full max-w-md border-slate-200/80 bg-white shadow-[0_10px_35px_rgba(0,0,0,0.04)] rounded-3xl p-8">
               <div className="flex flex-col items-center gap-6 py-4 text-center">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-emerald-500/30 bg-emerald-500/10">
-                  <Check className="h-7 w-7 text-emerald-400" />
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-emerald-200 bg-emerald-50">
+                  <Check className="h-8 w-8 text-emerald-600" />
                 </div>
-                <h2 className="font-display text-xl font-bold text-white">Assets Claimed</h2>
-                <p className="text-sm text-slate-400">
+                <h2 className="font-display text-2xl font-extrabold text-[#0a0f1d]">Assets Claimed</h2>
+                <p className="text-sm text-slate-500 font-normal">
                   {amountDisplay} {tokenDisplay} transferred to your wallet.
                 </p>
-                <div className="w-full rounded-xl border border-white/15 bg-black/40">
+                <div className="w-full rounded-xl border border-slate-200 bg-slate-50 p-3">
                   <input
                     type="text"
                     readOnly
                     value={walletAddr}
-                    className="w-full bg-transparent px-4 py-3 font-mono text-xs text-white outline-none"
+                    className="w-full bg-transparent px-2 py-1 font-mono text-xs text-[#0a0f1d] font-bold outline-none"
                   />
                 </div>
                 <ButtonLink
@@ -233,10 +233,11 @@ function ClaimPageInner() {
                   fullWidth
                   target="_blank"
                   rel="noopener noreferrer"
+                  className="font-sans text-xs font-bold uppercase tracking-wide border-slate-200 hover:border-[#15349e] rounded-full text-slate-700"
                 >
-                  View Transaction <ExternalLink className="h-4 w-4" />
+                  View Transaction <ExternalLink className="h-4 w-4 ml-1.5 text-[#15349e]" />
                 </ButtonLink>
-                <Link href="/" className="flex items-center gap-1 text-xs text-slate-500 hover:text-white">
+                <Link href="/" className="flex items-center gap-1 text-xs text-slate-500 hover:text-[#0a0f1d] font-semibold">
                   <ArrowLeft className="h-3 w-3" /> Back to Home
                 </Link>
               </div>
@@ -244,17 +245,17 @@ function ClaimPageInner() {
           )}
 
           {claimState === "error" && (
-            <GlassCard className="w-full max-w-md">
+            <GlassCard className="w-full max-w-md border-slate-200/80 bg-white shadow-[0_10px_35px_rgba(0,0,0,0.04)] rounded-3xl p-8">
               <div className="flex flex-col items-center gap-6 py-4 text-center">
-                <AlertCircle className="h-10 w-10 text-red-400" />
-                <h2 className="font-display text-xl font-bold text-white">Claim Failed</h2>
-                <div className="w-full rounded-xl border border-red-500/35 bg-red-950/30 p-4 text-sm text-red-300">
+                <AlertCircle className="h-10 w-10 text-red-500" />
+                <h2 className="font-display text-2xl font-extrabold text-[#0a0f1d]">Claim Failed</h2>
+                <div className="w-full rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600 font-medium">
                   {errorMsg}
                 </div>
-                <Button variant="primary" fullWidth onClick={() => setClaimState("idle")}>
+                <Button variant="primary" fullWidth onClick={() => setClaimState("idle")} className="font-sans text-xs font-bold uppercase tracking-wide shadow-[0_4px_20px_rgba(21,52,158,0.25)] rounded-full py-4">
                   Try Again
                 </Button>
-                <Link href="/" className="flex items-center gap-1 text-xs text-slate-500 hover:text-white">
+                <Link href="/" className="flex items-center gap-1 text-xs text-slate-500 hover:text-[#0a0f1d] font-semibold">
                   <ArrowLeft className="h-3 w-3" /> Back to Home
                 </Link>
               </div>
@@ -271,7 +272,7 @@ export default function ClaimPage() {
     <Suspense
       fallback={
         <PageShell className="items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-400" />
+          <Loader2 className="h-8 w-8 animate-spin text-[#15349e]" />
         </PageShell>
       }
     >

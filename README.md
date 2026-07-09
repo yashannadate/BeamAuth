@@ -35,7 +35,7 @@
 | :---: | :---: |
 | <img src="./public/images/landing.png" width="400" alt="Landing Page" /> | <img src="./public/images/dashboard.png" width="400" alt="Dashboard" /> |
 | **Passkey Biometric Claim** | **Mobile Responsive UI** |
-| <img src="./public/images/claim.png" width="400" alt="Claim Page" /> | <img src="./public/images/mobile_responsive_ui.png" width="400" alt="Mobile Responsive UI" /> |
+| <img src="./public/images/claim.png" width="400" alt="Claim Page" /> | <img src="./public/images/mobile_responsive_ui.png" width="200" alt="Mobile Responsive UI" /> |
 | **Vault Sealed · Claim Link Generated** | |
 | <img src="./public/images/lock_claim_link.png" width="400" alt="Lock Fund & Claim Link" /> | |
 
@@ -163,15 +163,20 @@ All core smart contracts and frontend pipelines have been rigorously tested and 
 
 ### 📊 Verification Media & Demo
 
-* **1. Mobile Responsive UI**:
-  ![Mobile Responsive UI](./public/images/mobile_responsive_ui.png)
-* **2. CI/CD Build Pipeline**:
-  ![GitHub Actions CI/CD Pipeline Build Status](./public/images/cicd_pipeline_run.png)
-* **3. Contract Test Output (11+ passing tests)**:
-  ![Soroban Contract Test Suite Execution Output](./public/images/soroban_test_output.png)
-* **4. On-Chain Interaction Transaction**:
-  ![Stellar Testnet Transaction Explorer Result](./public/images/contract_interaction_tx.png)
-* **5. Demo Video Presentation (1–2 Minutes)**:
+* **1. Mobile Responsive UI** — BeamAuth running natively on Android Chrome:
+  <img src="./public/images/mobile_responsive_ui.png" width="200" alt="Mobile Responsive UI" />
+
+* **2. CI/CD Build Pipeline** — GitHub Actions auto-build on every push:
+  ![GitHub Actions CI/CD Pipeline](./public/images/cicd_pipeline_run.png)
+
+* **3. Contract Test Output — 7/7 tests passing:**
+  ![Soroban Rust Contract Test Suite](./public/images/soroban_test_output.png)
+
+* **4. On-Chain Contract Deployment & Interaction:**
+  ![Escrow Contract Deploy + Claim TX on Stellar Testnet](./public/images/contract_interaction_tx.png)
+  > Direct TX link: [`6e418f...bd99`](https://stellar.expert/explorer/testnet/tx/6e418f289c6fd23bbca57a12444d884e4d65d0bc338c526208e46664e783bd99)
+
+* **5. Demo Video Presentation (1–2 Minutes):**
   🎥 **[▶ Watch BeamAuth Demo Video on Google Drive](https://drive.google.com/drive/folders/175ehtSSmudOnK_rxXY_HckGq1xVw1z9x)**
 
 

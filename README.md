@@ -24,7 +24,7 @@
   BeamAuth simplifies Web3 onboarding on Stellar Soroban by combining WebAuthn Passkeys (biometric authentication) with deterministic Smart Wallets and atomic escrow link claims. Users lock native XLM into verifiable on-chain escrows and send simple claim links—allowing recipients to deploy smart wallets and claim funds instantly using just FaceID or TouchID without seed phrases.
   <br />
   <br />
-  <a href="https://beamauth.vercel.app"><strong>🔴 Launch Live Demo</strong></a> · <a href="https://github.com/yashannadate/BeamAuth"><strong>📁 Explore Repository</strong></a>
+  <a href="https://beamauth.vercel.app"><strong>🔴 Launch Live Demo</strong></a> · <a href="https://drive.google.com/drive/folders/175ehtSSmudOnK_rxXY_HckGq1xVw1z9x"><strong>▶️ Demo Video</strong></a>
 </p>
 
 ---

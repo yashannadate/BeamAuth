@@ -36,6 +36,8 @@
 | <img src="./public/images/landing.png" width="400" alt="Landing Page" /> | <img src="./public/images/dashboard.png" width="400" alt="Dashboard" /> |
 | **Passkey Biometric Claim** | **Mobile Responsive UI** |
 | <img src="./public/images/claim.png" width="400" alt="Claim Page" /> | <img src="./public/images/mobile_responsive_ui.png" width="400" alt="Mobile Responsive UI" /> |
+| **Vault Sealed · Claim Link Generated** | |
+| <img src="./public/images/lock_claim_link.png" width="400" alt="Lock Fund & Claim Link" /> | |
 
 ---
 

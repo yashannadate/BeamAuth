@@ -34,8 +34,8 @@
 | Landing Page | Dashboard & Escrow Lock |
 | :---: | :---: |
 | <img src="./public/images/landing.png" width="400" alt="Landing Page" /> | <img src="./public/images/dashboard.png" width="400" alt="Dashboard" /> |
-| **Passkey Biometric Claim** | **Gasless Relayer Execution** |
-| <img src="./public/images/claim.png" width="400" alt="Claim Page" /> | <img src="./public/images/relayer.png" width="400" alt="Relayer Execution" /> |
+| **Passkey Biometric Claim** | **Mobile Responsive UI** |
+| <img src="./public/images/claim.png" width="400" alt="Claim Page" /> | <img src="./public/images/mobile_responsive_ui.png" width="400" alt="Mobile Responsive UI" /> |
 
 ---
 
@@ -105,7 +105,7 @@
 | **Mobile Responsive UI** | ✅ Verified | Tailwind responsive grids, flex wraps & mobile support |
 | **CI/CD Pipeline Running** | ✅ Active | Automated GitHub Actions (`main.yml`) 100% passing |
 | **Test Output (3+ tests)** | ✅ Verified | 11/11 Soroban Rust tests passing across 4 contracts |
-| **Demo Video Link (1–2 min)** | ✅ Ready | [Watch Demo Presentation Video Link](#-verification-media--demo) |
+| **Demo Video Link (1–2 min)** | ✅ Ready | [▶ Watch Demo Video on Google Drive](https://drive.google.com/drive/folders/175ehtSSmudOnK_rxXY_HckGq1xVw1z9x) |
 
 ### 🛠️ Core Capabilities
 | Feature | Status | Details |
@@ -161,19 +161,16 @@ All core smart contracts and frontend pipelines have been rigorously tested and 
 
 ### 📊 Verification Media & Demo
 
-> [!NOTE]
-> Below are placeholders to link your submission screenshots, including CLI test output, CI status, mobile layouts, and demo presentation video:
-
 * **1. Mobile Responsive UI**:
-  ![Mobile Responsive UI Mockup](./public/images/mobile_responsive_ui.png)
+  ![Mobile Responsive UI](./public/images/mobile_responsive_ui.png)
 * **2. CI/CD Build Pipeline**:
   ![GitHub Actions CI/CD Pipeline Build Status](./public/images/cicd_pipeline_run.png)
 * **3. Contract Test Output (11+ passing tests)**:
   ![Soroban Contract Test Suite Execution Output](./public/images/soroban_test_output.png)
 * **4. On-Chain Interaction Transaction**:
   ![Stellar Testnet Transaction Explorer Result](./public/images/contract_interaction_tx.png)
-* **5. Demo Video Presentation (1-2 Minutes)**:
-  * 🎥 **[Watch Demo Presentation Video Link](https://www.youtube.com/watch?v=your-video-id)**
+* **5. Demo Video Presentation (1–2 Minutes)**:
+  🎥 **[▶ Watch BeamAuth Demo Video on Google Drive](https://drive.google.com/drive/folders/175ehtSSmudOnK_rxXY_HckGq1xVw1z9x)**
 
 
 ---

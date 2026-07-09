@@ -66,10 +66,10 @@ export async function POST(req: NextRequest) {
       const messageHex = messageBytes.toString("hex");
 
       // 4. Build the register_device contract call
-      const podContractId = (process.env.NEXT_PUBLIC_POD_REGISTRY_CONTRACT_ID || "CCCT6ZJ3HN3Y46NNRU2NBJGX77HXGHJXO6FU3TYIGCX3PSRSYRVRGWDE").trim();
-      if (!podContractId) {
-        return NextResponse.json({ error: "PoD Registry Contract ID not configured" }, { status: 500 });
-      }
+      const envPodId = (process.env.NEXT_PUBLIC_POD_REGISTRY_CONTRACT_ID || "").trim();
+      const podContractId = envPodId.startsWith("C") && envPodId.length === 56
+        ? envPodId
+        : "CCCT6ZJ3HN3Y46NNRU2NBJGX77HXGHJXO6FU3TYIGCX3PSRSYRVRGWDE";
 
       const podContract = new Contract(podContractId);
       const userScVal = new Address(userAddress).toScVal();

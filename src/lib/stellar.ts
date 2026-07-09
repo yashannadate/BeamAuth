@@ -26,10 +26,16 @@ import {
 //  Config
 // ─────────────────────────────────────────────────────────────────────────────
 
+function getValidContractId(envVal: string | undefined, fallback: string): string {
+  const val = (envVal || "").trim();
+  if (val.startsWith("C") && val.length === 56) return val;
+  return fallback;
+}
+
 export const NETWORK_PASSPHRASE  = Networks.TESTNET;
 const RPC_URL             = (process.env.NEXT_PUBLIC_STELLAR_RPC_URL ?? "https://soroban-testnet.stellar.org").trim();
-const ESCROW_CONTRACT_ID  = (process.env.NEXT_PUBLIC_ESCROW_CONTRACT_ID  || "CAH7SZBIBQPH7E57UOU5MFR6V2VQBROBTMVPJ2MOUCRP7H7NSRIFRDCV").trim();
-const FACTORY_CONTRACT_ID = (process.env.NEXT_PUBLIC_FACTORY_CONTRACT_ID || "CCDV672F6FHX4G7FUV7Z4CJNPVAMR445QO6BR2BDKS44YBQET6UJFAX3").trim();
+const ESCROW_CONTRACT_ID  = getValidContractId(process.env.NEXT_PUBLIC_ESCROW_CONTRACT_ID, "CAH7SZBIBQPH7E57UOU5MFR6V2VQBROBTMVPJ2MOUCRP7H7NSRIFRDCV");
+const FACTORY_CONTRACT_ID = getValidContractId(process.env.NEXT_PUBLIC_FACTORY_CONTRACT_ID, "CCDV672F6FHX4G7FUV7Z4CJNPVAMR445QO6BR2BDKS44YBQET6UJFAX3");
 const RELAYER_SECRET_KEY  = (process.env.RELAYER_SECRET_KEY  || "SCYIG655TWYKQJAHDD7QV5WSQQI2ILUDN26QYBPWI5EMQF7PT5HHBGU2").trim();
 
 export { BASE_FEE };

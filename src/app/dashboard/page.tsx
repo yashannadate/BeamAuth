@@ -40,8 +40,10 @@ const checkIsVerifiedHuman = async (address: string): Promise<boolean> => {
   try {
     const serverUrl = process.env.NEXT_PUBLIC_STELLAR_RPC_URL ?? "https://soroban-testnet.stellar.org";
     const server = new StellarRpc.Server(serverUrl);
-    const podContractId = process.env.NEXT_PUBLIC_POD_REGISTRY_CONTRACT_ID ?? "";
-    if (!podContractId) return false;
+    const envPodId = (process.env.NEXT_PUBLIC_POD_REGISTRY_CONTRACT_ID || "").trim();
+    const podContractId = envPodId.startsWith("C") && envPodId.length === 56
+      ? envPodId
+      : "CCCT6ZJ3HN3Y46NNRU2NBJGX77HXGHJXO6FU3TYIGCX3PSRSYRVRGWDE";
     
     const contract = new Contract(podContractId);
     const op = contract.call("is_verified_human", new Address(address).toScVal());

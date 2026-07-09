@@ -11,13 +11,22 @@ import {
 const RPC_URL = (process.env.NEXT_PUBLIC_STELLAR_RPC_URL || "https://soroban-testnet.stellar.org").trim();
 const HORIZON_URL = (process.env.NEXT_PUBLIC_STELLAR_HORIZON_URL || "https://horizon-testnet.stellar.org").trim();
 
-/** Official Stellar Native Asset (XLM) contract on Soroban testnet/mainnet. */
-export const NATIVE_ASSET_CONTRACT_ID = (
-  process.env.NEXT_PUBLIC_NATIVE_ASSET_CONTRACT_ID ||
-  "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC"
-).trim();
+function getValidContractId(envVal: string | undefined, fallback: string): string {
+  const val = (envVal || "").trim();
+  if (val.startsWith("C") && val.length === 56) return val;
+  return fallback;
+}
 
-const ESCROW_ID = (process.env.NEXT_PUBLIC_ESCROW_CONTRACT_ID || "CAH7SZBIBQPH7E57UOU5MFR6V2VQBROBTMVPJ2MOUCRP7H7NSRIFRDCV").trim();
+/** Official Stellar Native Asset (XLM) contract on Soroban testnet/mainnet. */
+export const NATIVE_ASSET_CONTRACT_ID = getValidContractId(
+  process.env.NEXT_PUBLIC_NATIVE_ASSET_CONTRACT_ID,
+  "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC"
+);
+
+const ESCROW_ID = getValidContractId(
+  process.env.NEXT_PUBLIC_ESCROW_CONTRACT_ID,
+  "CAH7SZBIBQPH7E57UOU5MFR6V2VQBROBTMVPJ2MOUCRP7H7NSRIFRDCV"
+);
 const NETWORK_PASSPHRASE = "Test SDF Network ; September 2015";
 
 /** XLM uses 7 decimal places (stroops) on Soroban. */

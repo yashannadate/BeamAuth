@@ -24,14 +24,14 @@ export default function HomePage() {
         {/* ══════════════════════════════════════════════════
             HERO SECTION - INVOKO LIGHT AESTHETIC (#F4F6FB, DEEP NAVY, ELECTRIC COBALT BLUE)
         ═════════════════════════════════════════════════ */}
-        <section className="relative pt-20 pb-28 md:pt-32 md:pb-36 px-4 sm:px-6 overflow-hidden text-center font-sans">
+        <section className="relative pt-16 pb-20 sm:pt-20 sm:pb-28 md:pt-32 md:pb-36 px-4 sm:px-6 overflow-hidden text-center font-sans">
           <PageContainer className="flex flex-col items-center max-w-4xl mx-auto gap-6 z-10">
             
             {/* Headline with Invoko-style glowing orb badge replacing 'o' in Crypto */}
-            <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-[#0a0f1d] leading-[1.1]">
+            <h1 className="text-4xl xs:text-5xl md:text-7xl font-extrabold tracking-tight text-[#0a0f1d] leading-[1.1] px-2">
               Send Crypt
-              <span className="inline-flex items-center justify-center w-12 h-12 md:w-16 md:h-16 rounded-full bg-[#15349e] text-white shadow-[0_0_35px_rgba(21,52,158,0.45)] mx-1.5 -my-2 align-middle hover:scale-105 transition-transform cursor-pointer">
-                <Fingerprint className="w-6 h-6 md:w-8 md:h-8" />
+              <span className="inline-flex items-center justify-center w-10 h-10 xs:w-12 xs:h-12 md:w-16 md:h-16 rounded-full bg-[#15349e] text-white shadow-[0_0_35px_rgba(21,52,158,0.45)] mx-1 xs:mx-1.5 -my-1 xs:-my-2 align-middle hover:scale-105 transition-transform cursor-pointer">
+                <Fingerprint className="w-5 h-5 xs:w-6 xs:h-6 md:w-8 md:h-8" />
               </span>
               . Claim With a Glance.
             </h1>
@@ -60,13 +60,13 @@ export default function HomePage() {
             </div>
 
             {/* Protocol Metrics Ribbon (Clean White Card) */}
-            <div className="grid grid-cols-2 md:grid-cols-4 md:divide-x md:divide-slate-200/80 bg-white border border-slate-200/80 rounded-2xl p-6 sm:p-8 w-full max-w-4xl mt-10 gap-y-8 md:gap-y-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+            <div className="grid grid-cols-2 md:grid-cols-4 md:divide-x md:divide-slate-200/80 bg-white border border-slate-200/80 rounded-2xl px-4 py-6 sm:p-8 w-full max-w-4xl mt-10 gap-y-6 md:gap-y-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
               
               {/* Metric 1 */}
-              <div className="flex flex-col items-center justify-center text-center px-4">
-                <div className="flex items-center gap-2.5">
-                  <Zap className="h-6 w-6 text-amber-500 shrink-0" />
-                  <span className="text-3xl font-extrabold text-[#0a0f1d]">$0.00</span>
+              <div className="flex flex-col items-center justify-center text-center px-2 sm:px-4">
+                <div className="flex items-center gap-1.5 sm:gap-2.5">
+                  <Zap className="h-5 w-5 sm:h-6 sm:w-6 text-amber-500 shrink-0" />
+                  <span className="text-2xl sm:text-3xl font-extrabold text-[#0a0f1d]">$0.00</span>
                 </div>
                 <span className="text-xs uppercase tracking-widest font-mono text-slate-500 font-bold mt-1">
                   Gas Fee (Relayed)

@@ -77,7 +77,7 @@ export default function ExecutionTimeline() {
       </div>
 
       {/* Clean Vertical Timeline Layout */}
-      <div className="relative pl-6 sm:pl-10 md:pl-12 border-l-2 border-slate-200/80 flex flex-col gap-12 ml-4 sm:ml-8 my-4">
+      <div className="relative pl-10 sm:pl-14 border-l-2 border-slate-200/80 flex flex-col gap-12 ml-5 sm:ml-8 my-4">
         
         {steps.map((item) => {
           const Icon = item.icon;
@@ -86,12 +86,12 @@ export default function ExecutionTimeline() {
             <div key={item.step} className="relative group">
               
               {/* Timeline Circle Node on the Vertical Line */}
-              <div className="absolute -left-[39px] sm:-left-[55px] md:-left-[63px] top-1 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full border-2 border-white bg-[#15349e] text-white font-bold text-sm sm:text-base shadow-[0_4px_15px_rgba(21,52,158,0.3)] group-hover:scale-110 group-hover:bg-[#102a83] transition-all">
+              <div className="absolute -left-[3.1rem] sm:-left-[4.25rem] top-1 flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-full border-2 border-white bg-[#15349e] text-white font-bold text-sm shadow-[0_4px_15px_rgba(21,52,158,0.3)] group-hover:scale-110 group-hover:bg-[#102a83] transition-all">
                 <span>{item.step}</span>
               </div>
 
               {/* Step Content Card */}
-              <GlassCard className="flex flex-col gap-5 border-slate-200/80 hover:border-[#15349e]/40 transition-all p-6 sm:p-8 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+              <GlassCard className="flex flex-col gap-5 border-slate-200/80 hover:border-[#15349e]/40 transition-all p-5 sm:p-8 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
                 
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
                   <div className="flex items-center gap-3">

@@ -326,8 +326,8 @@ export default function DashboardPage() {
           
           {/* Header Title */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-6">
-            <div className="flex flex-col gap-1.5">
-              <h1 className="font-display text-3xl font-extrabold tracking-tight text-[#0a0f1d] sm:text-4xl">
+            <div className="flex flex-col gap-1.5 min-w-0">
+              <h1 className="font-display text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-[#0a0f1d]">
                 Biometric Escrow Console
               </h1>
             </div>
@@ -393,8 +393,8 @@ export default function DashboardPage() {
                   </div>
                   <div>
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">STELLAR ACCOUNT</span>
-                    <div className="flex items-center justify-between gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200/60">
-                      <span className="font-mono text-xs font-bold text-[#0a0f1d] truncate">{walletAddress}</span>
+                    <div className="flex items-center justify-between gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200/60 min-w-0">
+                      <span className="font-mono text-xs font-bold text-[#0a0f1d] truncate min-w-0">{walletAddress}</span>
                       <button
                         type="button"
                         onClick={copyAddress}
@@ -573,7 +573,7 @@ export default function DashboardPage() {
                         
                         {/* Lock Amount */}
                         <div className="flex flex-col gap-2">
-                          <label htmlFor="amount" className="text-xs font-bold uppercase tracking-wider text-slate-700 flex justify-between">
+                          <label htmlFor="amount" className="text-xs font-bold uppercase tracking-wider text-slate-700 flex flex-wrap justify-between gap-1">
                             <span>Lock Amount (XLM)</span>
                             <span className="text-xs text-slate-500 font-semibold">Available: {xlmBalance} XLM</span>
                           </label>
@@ -750,14 +750,14 @@ export default function DashboardPage() {
                       </div>
                       <span className="text-[10px] text-slate-400">SOROBAN TESTNET</span>
                     </div>
-                    <div className="flex flex-col gap-1.5 max-h-36 overflow-y-auto text-xs text-slate-300 font-mono">
+                    <div className="flex flex-col gap-1.5 max-h-36 overflow-y-auto text-xs text-slate-300 font-mono scrollbar-thin">
                       {logs.length === 0 ? (
                         <span className="text-slate-500 italic">No system events logged yet...</span>
                       ) : (
                         logs.map((log, index) => (
-                          <div key={index} className="flex items-start gap-2">
-                            <span className="text-emerald-400 font-bold">❯</span>
-                            <span className="break-all">{log}</span>
+                          <div key={index} className="flex items-start gap-2 min-w-0">
+                            <span className="text-emerald-400 font-bold shrink-0">❯</span>
+                            <span className="break-all min-w-0">{log}</span>
                           </div>
                         ))
                       )}

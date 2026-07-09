@@ -69,17 +69,17 @@ export default function Navbar() {
   ];
 
   return (
-    <header className="sticky top-4 z-50 mx-auto w-full max-w-6xl px-4 sm:px-6 font-sans">
+    <header className="sticky top-2 sm:top-4 z-50 mx-auto w-full max-w-6xl px-3 sm:px-6 font-sans">
       <nav
-        className="flex h-14 items-center justify-between rounded-full border border-slate-200/80 bg-white/85 px-5 sm:px-6 backdrop-blur-2xl shadow-[0_4px_25px_rgba(0,0,0,0.04)] transition-all font-sans"
+        className="flex h-14 items-center justify-between rounded-full border border-slate-200/80 bg-white/85 px-4 sm:px-6 backdrop-blur-2xl shadow-[0_4px_25px_rgba(0,0,0,0.04)] transition-all font-sans min-w-0"
         aria-label="Main navigation"
       >
         {/* Left Side: Logo & Brand */}
-        <Link href="/" className="flex items-center gap-2.5 no-underline group shrink-0">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#15349e] text-white shadow-[0_0_15px_rgba(21,52,158,0.3)] group-hover:bg-[#102a83] transition-all">
+        <Link href="/" className="flex items-center gap-2 sm:gap-2.5 no-underline group shrink-0">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#15349e] text-white shadow-[0_0_15px_rgba(21,52,158,0.3)] group-hover:bg-[#102a83] transition-all shrink-0">
             <Cpu className="h-4 w-4" />
           </div>
-          <span className="font-display text-lg font-extrabold tracking-tight text-[#0a0f1d]">
+          <span className="font-display text-base sm:text-lg font-extrabold tracking-tight text-[#0a0f1d]">
             BeamAuth
           </span>
         </Link>
@@ -115,19 +115,19 @@ export default function Navbar() {
                 <button
                   type="button"
                   onClick={() => setShowWalletMenu((prev) => !prev)}
-                  className="inline-flex items-center gap-2.5 rounded-full border border-slate-200 bg-white px-4 py-1.5 font-sans text-xs text-[#0a0f1d] hover:bg-slate-50 hover:border-slate-300 transition-all cursor-pointer select-none shadow-sm"
+                  className="inline-flex items-center gap-1.5 sm:gap-2.5 rounded-full border border-slate-200 bg-white px-3 sm:px-4 py-1.5 font-sans text-xs text-[#0a0f1d] hover:bg-slate-50 hover:border-slate-300 transition-all cursor-pointer select-none shadow-sm max-w-[180px] sm:max-w-none"
                 >
-                  <div className="flex items-center justify-center h-5 w-5 rounded-full bg-[#15349e] text-white">
+                  <div className="flex items-center justify-center h-5 w-5 rounded-full bg-[#15349e] text-white shrink-0">
                     <Wallet className="h-3 w-3" />
                   </div>
-                  <span className="font-semibold text-[#0a0f1d] tracking-tight">{shortAddr}</span>
+                  <span className="font-semibold text-[#0a0f1d] tracking-tight truncate">{shortAddr}</span>
                   {balance !== null && (
-                    <>
+                    <span className="hidden lg:flex items-center gap-1.5">
                       <span className="text-slate-300">•</span>
-                      <span className="text-[#15349e] font-bold">{balance} XLM</span>
-                    </>
+                      <span className="text-[#15349e] font-bold whitespace-nowrap">{balance} XLM</span>
+                    </span>
                   )}
-                  <ChevronDown className={cn("h-3.5 w-3.5 text-slate-400 transition-transform", showWalletMenu && "rotate-180")} />
+                  <ChevronDown className={cn("h-3.5 w-3.5 text-slate-400 transition-transform shrink-0", showWalletMenu && "rotate-180")} />
                 </button>
 
                 {/* Quick Disconnect Button */}

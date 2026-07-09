@@ -101,7 +101,7 @@
 | **Minimum 10+ Commits** | ✅ Verified | 15+ meaningful incremental development commits in git history |
 | **Live Demo Link** | ✅ Live | [beamauth.vercel.app](https://beamauth.vercel.app) |
 | **Contract Deployment Address** | ✅ Deployed | Escrow: [`CAH7SZBIBQPH...`](https://stellar.expert/explorer/testnet/contract/CAH7SZBIBQPH7E57UOU5MFR6V2VQBROBTMVPJ2MOUCRP7H7NSRIFRDCV) |
-| **Transaction Hash / Explorer** | ✅ Active | [Stellar Testnet Relayer Account Explorer](https://stellar.expert/explorer/testnet/account/GCECDZC5EMFR6DIHRLQ6GAYGAIPDJSBAXDO27GUJHXZF6ZIQRF7ULDGD) |
+| **Transaction Hash / Explorer** | ✅ Active | [`6e418f...bd99`](https://stellar.expert/explorer/testnet/tx/6e418f289c6fd23bbca57a12444d884e4d65d0bc338c526208e46664e783bd99) · [Relayer Account](https://stellar.expert/explorer/testnet/account/GCECDZC5EMFR6DIHRLQ6GAYGAIPDJSBAXDO27GUJHXZF6ZIQRF7ULDGD) |
 | **Mobile Responsive UI** | ✅ Verified | Tailwind responsive grids, flex wraps & mobile support |
 | **CI/CD Pipeline Running** | ✅ Active | Automated GitHub Actions (`main.yml`) 100% passing |
 | **Test Output (3+ tests)** | ✅ Verified | 11/11 Soroban Rust tests passing across 4 contracts |

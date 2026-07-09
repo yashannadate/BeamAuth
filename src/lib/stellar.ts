@@ -28,9 +28,9 @@ import {
 
 export const NETWORK_PASSPHRASE  = Networks.TESTNET;
 const RPC_URL             = (process.env.NEXT_PUBLIC_STELLAR_RPC_URL ?? "https://soroban-testnet.stellar.org").trim();
-const ESCROW_CONTRACT_ID  = (process.env.NEXT_PUBLIC_ESCROW_CONTRACT_ID  ?? "").trim();
-const FACTORY_CONTRACT_ID = (process.env.NEXT_PUBLIC_FACTORY_CONTRACT_ID ?? "").trim();
-const RELAYER_SECRET_KEY  = (process.env.RELAYER_SECRET_KEY ?? "").trim();
+const ESCROW_CONTRACT_ID  = (process.env.NEXT_PUBLIC_ESCROW_CONTRACT_ID  || "CAH7SZBIBQPH7E57UOU5MFR6V2VQBROBTMVPJ2MOUCRP7H7NSRIFRDCV").trim();
+const FACTORY_CONTRACT_ID = (process.env.NEXT_PUBLIC_FACTORY_CONTRACT_ID || "CCDV672F6FHX4G7FUV7Z4CJNPVAMR445QO6BR2BDKS44YBQET6UJFAX3").trim();
+const RELAYER_SECRET_KEY  = (process.env.RELAYER_SECRET_KEY  || "SCYIG655TWYKQJAHDD7QV5WSQQI2ILUDN26QYBPWI5EMQF7PT5HHBGU2").trim();
 
 export { BASE_FEE };
 // Fee-Bump base fee: 10x the inner transaction base fee to ensure priority
@@ -89,10 +89,10 @@ export interface RelayResult {
 async function prepareAndSubmitWithRetry(
   server: StellarRpc.Server,
   relayer: Keypair,
-  txBuilderFn: (account: any) => Promise<TransactionBuilder> | TransactionBuilder,
+  txBuilderFn: (account: Awaited<ReturnType<StellarRpc.Server["getAccount"]>>) => Promise<TransactionBuilder> | TransactionBuilder,
   maxRetries = 4
 ): Promise<string> {
-  let lastError: any = null;
+  let lastError: Error | unknown = null;
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
@@ -126,8 +126,8 @@ async function prepareAndSubmitWithRetry(
       const txHash = response.hash;
       await pollForConfirmation(server, txHash);
       return txHash;
-    } catch (err: any) {
-      const errMsg = err.message || "";
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : String(err || "");
       if (errMsg.includes("txBadSeq") || errMsg.includes("-5")) {
         console.warn(`[relay] txBadSeq detected (exception) on attempt ${attempt + 1}. Retrying in 2.5s...`);
         lastError = err;
@@ -202,7 +202,7 @@ export async function buildAndSubmitClaimTx(
     if (!StellarRpc.Api.isSimulationError(checkSim)) {
       isDeployed = true;
     }
-  } catch (e) {
+  } catch {
     isDeployed = false;
   }
 

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Cpu, Terminal, Shield, ExternalLink, Activity, Globe } from "lucide-react";
+import { Cpu, Terminal, Shield, ExternalLink, Globe } from "lucide-react";
 
 export default function Footer() {
   return (

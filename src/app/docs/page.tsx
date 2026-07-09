@@ -1,21 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import {
   BookOpen,
-  Cpu,
   Shield,
   FileCode,
   Server,
   Key,
-  Lock,
   ExternalLink,
   Copy,
   Check,
-  Terminal,
   Layers,
-  ArrowRight,
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";

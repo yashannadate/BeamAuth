@@ -6,7 +6,6 @@ import {
   Zap,
   ShieldCheck,
   ArrowRight,
-  Terminal,
   Layers,
   Lock,
   Key,

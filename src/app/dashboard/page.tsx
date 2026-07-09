@@ -16,9 +16,6 @@ import {
   CheckCircle,
   Fingerprint,
   Cpu,
-  Activity,
-  ArrowRight,
-  Sparkles,
   Terminal,
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
@@ -63,7 +60,7 @@ const checkIsVerifiedHuman = async (address: string): Promise<boolean> => {
       return false;
     }
     
-    const resultVal = (sim as any).result?.retval;
+    const resultVal = (sim as StellarRpc.Api.SimulateTransactionSuccessResponse).result?.retval;
     if (resultVal) {
       return resultVal.b();
     }
@@ -82,9 +79,9 @@ export default function DashboardPage() {
   const [secret, setSecret] = useState("");
 
   const [podStatus, setPodStatus] = useState<"idle" | "loading" | "verified" | "unregistered" | "registering" | "error">("idle");
-  const [podKey, setPodKey] = useState("");
+  const [, setPodKey] = useState("");
   const [podScore, setPodScore] = useState("0%");
-  const [podTxHash, setPodTxHash] = useState("");
+  const [, setPodTxHash] = useState("");
 
   const [duration, setDuration] = useState(17280);
   const [status, setStatus] = useState<TxStatus>("idle");
@@ -108,7 +105,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (!walletAddress) {
-      setPodStatus("idle");
+      queueMicrotask(() => setPodStatus("idle"));
       return;
     }
 
@@ -173,7 +170,7 @@ export default function DashboardPage() {
           allowCredentials: [{
             id: regResponse.id,
             type: "public-key",
-            transports: (regResponse.response.transports ?? ["internal"]) as any,
+            transports: (regResponse.response.transports ?? ["internal"]) as ("internal" | "usb" | "nfc" | "ble" | "hybrid")[],
           }],
           userVerification: "required",
           timeout: 60000,
@@ -229,7 +226,7 @@ export default function DashboardPage() {
       setPodStatus("verified");
       setPodScore("100%");
       
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error);
       setPodStatus("error");
     }

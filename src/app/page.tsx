@@ -1,16 +1,10 @@
 "use client";
 
 import {
-  Terminal,
-  Shield,
   Cpu,
-  Lock,
   Fingerprint,
   Zap,
   ArrowRight,
-  FileCode,
-  Layers,
-  Key,
   Timer,
   ShieldCheck,
   ChevronDown,
@@ -19,7 +13,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ExecutionTimeline from "@/components/ExecutionTimeline";
 import { ButtonLink } from "@/components/ui/button";
-import { PageShell, PageContainer, GlassCard } from "@/components/ui/layout";
+import { PageShell, PageContainer } from "@/components/ui/layout";
 
 export default function HomePage() {
   return (

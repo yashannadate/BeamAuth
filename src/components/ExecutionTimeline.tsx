@@ -10,14 +10,13 @@ import {
   Terminal,
   Sparkles,
   Send,
-  ShieldCheck,
 } from "lucide-react";
 import { ButtonLink } from "@/components/ui/button";
 import { GlassCard } from "@/components/ui/layout";
 import { cn } from "@/lib/utils";
 
 export default function ExecutionTimeline() {
-  const [terminalLogs, setTerminalLogs] = useState<string[]>([
+  const [terminalLogs] = useState<string[]>([
     "[SYSTEM] Secure Enclave session initialized...",
     "[VAULT] Digital envelope locked on-chain (Gas fee: $0.00)...",
     "[ATTEST] Waiting for recipient Face ID / Touch ID authentication...",
@@ -80,9 +79,8 @@ export default function ExecutionTimeline() {
       {/* Clean Vertical Timeline Layout */}
       <div className="relative pl-6 sm:pl-10 md:pl-12 border-l-2 border-slate-200/80 flex flex-col gap-12 ml-4 sm:ml-8 my-4">
         
-        {steps.map((item, idx) => {
+        {steps.map((item) => {
           const Icon = item.icon;
-          const isLast = idx === steps.length - 1;
 
           return (
             <div key={item.step} className="relative group">

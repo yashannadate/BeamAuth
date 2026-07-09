@@ -15,7 +15,11 @@ export async function GET(req: NextRequest) {
   crypto.getRandomValues(challenge);
   const challengeB64 = Buffer.from(challenge).toString("base64url");
 
-  const rpId = process.env.NEXT_PUBLIC_WEBAUTHN_RP_ID ?? "localhost";
+  let rpId = process.env.NEXT_PUBLIC_WEBAUTHN_RP_ID;
+  const host = req.headers.get("host") || new URL(req.url).hostname;
+  if (!rpId || rpId === "localhost" || rpId === "127.0.0.1" || host.includes("vercel.app") || host.includes("beamauth")) {
+    rpId = host.split(":")[0];
+  }
 
   // Generate a random 16-byte user ID
   const userId = new Uint8Array(16);
@@ -34,7 +38,8 @@ export async function GET(req: NextRequest) {
       displayName: `PoD Anchor - ${userAddress.slice(0, 8)}...`,
     },
     pubKeyCredParams: [
-      { type: "public-key", alg: -7 }, // ES256 (secp256r1)
+      { type: "public-key", alg: -7 },   // ES256 (secp256r1)
+      { type: "public-key", alg: -257 }, // RS256 compatibility
     ],
     timeout: 60_000,
     attestation: "none",
